@@ -1,74 +1,50 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import Recents, { RecentItem } from "@/components/home/Recents";
+import ScreenHeader from "@/components/ScreenHeader";
+import React from "react";
+import { ScrollView, View } from "react-native";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-
-export default function HomeScreen() {
+export default function Home() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={{ flex: 1 }}>
+      <ScreenHeader />
+      <ScrollView
+        style={{ paddingTop: 12, backgroundColor: "#181818" }}
+        contentContainerStyle={{ gap: 12 }}
+      >
+        <Recents data={recentItems} />
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+export const recentItems: RecentItem[] = [
+  {
+    title: "Chill Vibes",
+    imageUrl:
+      "https://i.scdn.co/image/ab67616d0000b273ed79f4b46d206bd1f3e2bcaf",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  {
+    title: "Top Hits 2024",
+    imageUrl:
+      "https://i.scdn.co/image/ab67616d0000b27371d62ea7ea8a5be92d3c1f62",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  {
+    title: "Workout Pump",
+    imageUrl:
+      "https://mosaic.scdn.co/640/ab67616d00001e020d66934f5370419636c78f18ab67616d00001e026d97b3dc154dfdbe2321fb5cab67616d00001e0274a555ea03b0844b1e1d4513ab67616d00001e02a456a3bad97e054401f85a74",
   },
-});
+  {
+    title: "Lo-Fi Beats",
+    imageUrl:
+      "https://i.scdn.co/image/ab6761610000e5ebeaa4f0b2787ecc97a87d5457",
+  },
+  {
+    title: "Indie Essentials",
+    imageUrl:
+      "https://i.scdn.co/image/ab67616d0000b2732a038d3bf875d23e4aeaa84e",
+  },
+  {
+    title: "Liked Songs",
+    imageUrl: "https://misc.scdn.co/liked-songs/liked-songs-640.jpg",
+  },
+];

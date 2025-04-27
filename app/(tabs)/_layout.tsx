@@ -1,43 +1,93 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import BottomTabBar from "@/components/tabBar/BottomTabBar";
+import TabBarItem from "@/components/tabBar/TabBarItem";
+import { BlurView } from "expo-blur";
+import { Tabs } from "expo-router";
+import { StyleSheet } from "react-native";
+import Animated from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
+      tabBar={(props) => {
+        return <BottomTabBar {...props} />;
+      }}
+      initialRouteName="search"
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
+        tabBarActiveBackgroundColor: "red",
+        tabBarStyle: { position: "absolute" },
+        tabBarBackground: () => {
+          return (
+            <BlurView
+              tint="dark"
+              intensity={100}
+              style={StyleSheet.absoluteFill}
+            />
+          );
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "Home",
+          tabBarIcon: ({ focused }) => (
+            <TabBarItem
+              label="Home"
+              source={
+                focused
+                  ? require("../../assets/svgs/home_filled.svg")
+                  : require("../../assets/svgs/home.svg")
+              }
+              isFocused={focused}
+            />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="search"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "Search",
+          headerShown: true,
+          headerTransparent: false,
+          header: ({ layout, options }) => {
+            return (
+              <Animated.View
+                style={{ paddingTop: insets.top, backgroundColor: "#121212" }}
+              />
+            );
+          },
+          tabBarIcon: ({ focused }) => (
+            <TabBarItem
+              label="Search"
+              source={
+                focused
+                  ? require("../../assets/svgs/search_filled.svg")
+                  : require("../../assets/svgs/search.svg")
+              }
+              isFocused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="library"
+        options={{
+          title: "Library",
+          tabBarIcon: ({ focused }) => (
+            <TabBarItem
+              label="Your Library"
+              source={
+                focused
+                  ? require("../../assets/svgs/library_filled.svg")
+                  : require("../../assets/svgs/library.svg")
+              }
+              isFocused={focused}
+            />
+          ),
         }}
       />
     </Tabs>
