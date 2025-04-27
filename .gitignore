@@ -38,6 +38,7 @@ yarn-error.*
 app-example
 
 .lh
-*lock.json
+./*lock.json
 
 ios/
+package-lock.json
