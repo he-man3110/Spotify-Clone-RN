@@ -1,5 +1,6 @@
 import axios from "axios";
-import Aes from "react-native-aes-crypto";
+import { Buffer } from "buffer";
+import * as Crypto from "expo-crypto";
 import AppCredentials from "../../app.credentials.json";
 import { TopItemResponse, TopItemType, UserProfile } from "./CommonTypes";
 
@@ -20,14 +21,17 @@ class SpotifySDK {
 
   async authenticate() {
     const base64encode = (input: string) => {
-      return btoa(input)
-        .replace(/=/g, "")
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_");
+      return input.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
     };
 
-    const codeVerifier = await Aes.randomKey(64);
-    const hashed = await Aes.sha256(codeVerifier);
+    const _randomBytes = await Crypto.getRandomBytesAsync(64);
+    const randomBytes = Buffer.from(_randomBytes).toString("base64");
+    const codeVerifier = base64encode(randomBytes);
+    const hashed = await Crypto.digestStringAsync(
+      Crypto.CryptoDigestAlgorithm.SHA256,
+      codeVerifier,
+      { encoding: Crypto.CryptoEncoding.BASE64 }
+    );
     const codeChallenge = base64encode(hashed);
 
     const scope = "user-read-private user-read-email";

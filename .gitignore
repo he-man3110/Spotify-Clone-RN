@@ -41,7 +41,8 @@ app-example
 ./*lock.json
 
 ios/
-package-lock.json
+*.json
 
 app.*.json
 
+/package-lock.json
