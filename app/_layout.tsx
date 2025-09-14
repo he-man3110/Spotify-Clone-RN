@@ -1,3 +1,6 @@
+import sdk from "@/Data/sdk/DataSource";
+import { store } from "@/Data/state/store";
+import { useColorScheme } from "@/hooks/useColorScheme";
 import {
   DarkTheme,
   DefaultTheme,
@@ -8,15 +11,14 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import "react-native-reanimated";
-
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import "react-native-reanimated";
 import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Provider } from "react-redux";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -35,6 +37,10 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    sdk.initialize();
+  }, []);
+
+  useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
@@ -47,21 +53,12 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView>
-        <Stack>
-          {/* <Stack.Screen
-            name="index"
-            options={{
-              headerShown: false,
-              headerTransparent: false,
-              header: () => (
-                <View
-                  style={{ paddingTop: insets.top, backgroundColor: "#181818" }}
-                />
-              ),
-            }}
-          /> */}
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
+        <Provider store={store}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(prelogin)" options={{ headerShown: false }} />
+          </Stack>
+        </Provider>
         <StatusBar style="auto" />
       </GestureHandlerRootView>
     </ThemeProvider>

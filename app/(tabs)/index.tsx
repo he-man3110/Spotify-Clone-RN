@@ -1,4 +1,5 @@
 import Recents, { RecentItem } from "@/components/home/Recents";
+import RecentsView from "@/components/home/Recents/RecentsView";
 import ScreenHeader from "@/components/ScreenHeader";
 import React from "react";
 import { ScrollView, View } from "react-native";
@@ -12,6 +13,7 @@ export default function Home() {
         contentContainerStyle={{ gap: 12 }}
       >
         <Recents data={recentItems} />
+        <RecentsView />
       </ScrollView>
     </View>
   );
