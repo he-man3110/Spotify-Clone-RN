@@ -34,6 +34,7 @@ class SpotifySDK {
     );
     const codeChallenge = base64encode(hashed);
 
+    const url = new URL("https://accounts.spotify.com/authorize");
     const scope = "user-read-private user-read-email";
     const params = {
       response_type: "code",
@@ -43,8 +44,10 @@ class SpotifySDK {
       code_challenge: codeChallenge,
       redirect_uri: "https://www.google.com",
     };
+    const urlParams = new URLSearchParams(params).toString();
+    url.search = urlParams;
 
-    const url = "https://accounts.spotify.com/authoriz";
+    return { url, codeVerifier };
   }
 
   async getUserProfile() {

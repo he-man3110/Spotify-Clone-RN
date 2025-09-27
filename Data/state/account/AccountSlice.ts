@@ -9,7 +9,7 @@ const accountSlice = createSlice({
   initialState: {
     auth: {
       token: undefined as string | undefined,
-      isAuthenticated: false as boolean,
+      isAuthenticated: true as boolean,
     },
     details: {
       id: undefined as string | undefined,

@@ -10,6 +10,7 @@ function DiscoverList() {
     "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     (player) => {
       player.loop = true;
+      player.volume = 0;
       player.play();
     }
   );

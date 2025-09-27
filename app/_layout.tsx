@@ -55,8 +55,7 @@ export default function RootLayout() {
       <GestureHandlerRootView>
         <Provider store={store}>
           <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(prelogin)" options={{ headerShown: false }} />
+            <Stack.Screen name="(main)" options={{ headerShown: false }} />
           </Stack>
         </Provider>
         <StatusBar style="auto" />
