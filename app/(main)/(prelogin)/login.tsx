@@ -18,7 +18,7 @@ export default function LoginScreen() {
   useEffect(() => {
     (async () => {
       try {
-        const { url, codeVerifier: verifier } = await sdk.authenticate();
+        const { url, codeVerifier: verifier } = await sdk.getAuthURL();
         setAuthUrl(url.toString());
         codeVerifier.current = verifier;
       } catch (e) {
