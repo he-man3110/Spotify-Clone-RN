@@ -14,7 +14,7 @@ export function CustomDrawerContent() {
       <View style={styles.headerContainer}>
         <View>
           <Text style={styles.headerText} testID="drawer-header">
-            HEMAN ⚡️
+            H Ξ M Λ N ⚡️
           </Text>
           <LinkButton
             title="View profile"

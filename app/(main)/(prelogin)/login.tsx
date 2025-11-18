@@ -1,4 +1,6 @@
 import sdk from "@/Data/sdk/DataSource";
+import { login } from "@/Data/state/account/AccountSlice";
+import { useAppDispatch } from "@/hooks/useStore";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,6 +16,7 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const [authUrl, setAuthUrl] = useState<string | null>(null);
   const codeVerifier = useRef<string>(null);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     (async () => {
@@ -29,21 +32,26 @@ export default function LoginScreen() {
 
   const shouldLoadCallback = (event: ShouldStartLoadRequest) => {
     const { url } = event;
-    if (url.startsWith("https://www.google.com")) {
-      const urlObj = new URL(url);
+    const urlObj = new URL(url);
+    if (url.startsWith("https://www.hemanth.dev/callback") || urlObj.searchParams.has("code")) {
+      console.log("[WebView] Request to Load Denied For :", url);
       const code = urlObj.searchParams.get("code");
       if (code && codeVerifier.current) {
         (async () => {
+          console.log("Authorization code:", code);
           try {
-            // await sdk.requestAccessToken(code, codeVerifier.current);
-            console.log("Authorization code:", code);
+            if (codeVerifier.current) {
+              await dispatch(login({ authorizationCode: code, codeVerifier: codeVerifier.current })).unwrap();
+            }
           } catch (e) {
             // Handle error
+            console.error("Error during token exchange:", e);
           }
         })();
       }
       return false;
     }
+    console.log("[WebView] Request to Load Allowed For :", url);
     return true;
   };
 

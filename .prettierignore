@@ -1,0 +1,15 @@
+# Ignore artifacts:
+node_modules/
+.expo/
+dist/
+build/
+.next/
+coverage/
+*.log
+.env*
+.DS_Store
+Thumbs.db
+*.min.js
+*.min.css
+package-lock.json
+yarn.lock

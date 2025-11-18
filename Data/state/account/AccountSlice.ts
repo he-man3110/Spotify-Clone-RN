@@ -1,5 +1,6 @@
-import { TopItem, TopItemType } from "@/Data/sdk/CommonTypes";
+import { TopItemType } from "@/Data/sdk/CommonTypes";
 import sdk from "@/Data/sdk/DataSource";
+import { TopItem } from "@/Data/sdk/types/TopItemResponse";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 type Size = { height: number; width: number };
@@ -9,7 +10,7 @@ const accountSlice = createSlice({
   initialState: {
     auth: {
       token: undefined as string | undefined,
-      isAuthenticated: true as boolean,
+      isAuthenticated: false as boolean,
     },
     details: {
       id: undefined as string | undefined,
@@ -35,14 +36,31 @@ const accountSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(loadAccountDetails.pending, (state) => {
+
+      .addCase(login.pending, (state) => {
+        state.auth.isAuthenticated = false;
+      })
+      .addCase(login.fulfilled, (state, action) => {
+        state.auth.token = action.payload;
+        state.auth.isAuthenticated = true;
+      })
+      .addCase(login.rejected, (state, action) => {
+        state.auth.token = undefined;
+        state.auth.isAuthenticated = false;
+      })
+
+      .addCase(loadAuthenticationStatus.fulfilled, (state, action) => {
+        state.auth.isAuthenticated = action.payload;
+      })
+
+      .addCase(loadUserProfile.pending, (state) => {
         if (state.details.isAvailable) {
           state.details.isRefreshing = true;
         } else {
           state.details.isLoading = true;
         }
       })
-      .addCase(loadAccountDetails.fulfilled, (state, action) => {
+      .addCase(loadUserProfile.fulfilled, (state, action) => {
         const profileDetails = action.payload;
 
         state.details.displayName = profileDetails.display_name;
@@ -63,7 +81,7 @@ const accountSlice = createSlice({
 
         state.details.isAvailable = true;
       })
-      .addCase(loadAccountDetails.rejected, (state, action) => {
+      .addCase(loadUserProfile.rejected, (state, action) => {
         state.details.isAvailable = false;
       })
 
@@ -82,8 +100,31 @@ const accountSlice = createSlice({
   },
 });
 
-export const loadAccountDetails = createAsyncThunk(
-  "AccountSlice/loadAccountDetails",
+export const login = createAsyncThunk(
+  "AccountSlice/login",
+  async (props: { authorizationCode: string; codeVerifier: string }) => {
+    try {
+      return await sdk.login(props);
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const loadAuthenticationStatus = createAsyncThunk(
+  "AccountSlice/loadAuthenticationStatus",
+  async () => {
+    try {
+      const isAuthenticated = await sdk.isUserAuthenticated();
+      return isAuthenticated;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const loadUserProfile = createAsyncThunk(
+  "AccountSlice/loadUserProfile",
   async () => {
     try {
       const response = await sdk.getUserProfile();
@@ -98,7 +139,9 @@ export const loadUsersTopItems = createAsyncThunk(
   "AccountSlice/loadUsersTopItems",
   async (arg: { type: TopItemType }) => {
     try {
-      return await sdk.getUsersTopItem(arg);
+      const result = await sdk.getUsersTopItem(arg);
+      console.log("Top items loaded:", result);
+      return result;
     } catch (error) {
       throw error;
     }

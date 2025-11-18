@@ -8,56 +8,85 @@ import { TopItemType } from "./CommonTypes";
 import { AccessTokenResponse } from "./types/AccessTokenResponse";
 import { TopItemResponse } from "./types/TopItemResponse";
 import { UserProfile } from "./types/UserProfileResponse";
+import { CacheExpiry } from "./CacheExpiry";
+import { Log as Logger } from "@utils/log/Log";
 
 export type AuthorizationCode = string;
+
+const Log = Logger.createTaggedLogger("[SDK]");
 
 class SpotifySDK {
   private client_id: string;
   private client_secret: string;
   private redirect_uri = "https://www.google.com";
 
-  private accessToken: string | undefined = undefined;
+  private tokenRefreshTask: Promise<string> | undefined = undefined;
 
   constructor() {
     this.client_id = AppCredentials["SPOTIFY_CLIENT_ID"];
     this.client_secret = AppCredentials["SPOTIFY_CLIENT_SECRET"];
   }
 
-  async initialize() {}
-
-  private getAuthorizationHeader() {
-    return {
-      Authorization: `Bearer ${this.accessToken}`,
-    };
+  async initialize() {
+    return;
   }
 
   private hasExpired(timestamp: number): boolean {
     return Date.now() > timestamp;
   }
 
-  private async refreshAccessToken(refreshToken: string) {
-    const url = "https://accounts.spotify.com/api/token";
-    const params = new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: refreshToken,
-      client_id: this.client_id,
-    });
-
-    try {
-      const response = await axios.post<AccessTokenResponse>(url, params, {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      });
-      if (response.status === 200) {
-        return response.data;
-      } else {
-        throw response.statusText;
-      }
-    } catch (error) {
-      console.error("Error refreshing access token:", error);
-      throw error;
+  private async refreshAndGetToken() {
+    if (this.tokenRefreshTask) {
+      return await this.tokenRefreshTask;
     }
+
+    const authData = await apiCache.get<AccessTokenResponse>(
+      CacheKeys.AuthData
+    );
+
+    if (authData && this.hasExpired(authData.expires_in - 120_000)) {
+      const refreshToken = authData.refresh_token;
+      const url = "https://accounts.spotify.com/api/token";
+      const params = new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        client_id: this.client_id,
+      });
+
+      Log.d("Refreshing Auth Token");
+      try {
+        this.tokenRefreshTask = new Promise((resolve, reject) => {
+          axios
+            .post<AccessTokenResponse>(url, params, {
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+            })
+            .then((response) => {
+              if (response.status === 200) {
+                const expiryTime = response.data.expires_in * 1000 + Date.now();
+                apiCache.set(
+                  CacheKeys.AuthData,
+                  { ...response.data, expires_in: expiryTime },
+                  CacheExpiry.ONE_MONTH
+                );
+                resolve(response.data.access_token);
+              } else {
+                reject(response.statusText);
+              }
+            });
+        });
+
+        return await this.tokenRefreshTask;
+      } catch (error) {
+        Log.e(`Error while refreshing access token: ${error}`);
+        throw error;
+      }
+    } else if (!authData) {
+      // TODO: Throw a uniform error.
+      throw "Session Expired";
+    }
+    return authData.access_token;
   }
 
   async getAuthURL() {
@@ -76,7 +105,8 @@ class SpotifySDK {
     const codeChallenge = base64encode(hashed);
 
     const url = new URL("https://accounts.spotify.com/authorize");
-    const scope = "user-read-private user-read-email";
+    const scope =
+      "user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control user-follow-read user-follow-modify user-read-playback-position user-top-read user-read-recently-played";
     const params = {
       response_type: "code",
       client_id: this.client_id,
@@ -95,64 +125,56 @@ class SpotifySDK {
     return await apiCache.has(CacheKeys.AuthData);
   }
 
-  async renewUserSession() {
-    try {
-      await this.getAccessToken();
-      return true;
-    } catch (error) {
-      return false;
+  async login(args: { authorizationCode: string; codeVerifier: string }) {
+    const url = "https://accounts.spotify.com/api/token";
+    const params = new URLSearchParams({
+      grant_type: "authorization_code",
+      code: args.authorizationCode,
+      redirect_uri: this.redirect_uri,
+      client_id: this.client_id,
+      code_verifier: args.codeVerifier,
+    });
+    const response = await axios.post<AccessTokenResponse>(url, params, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+    if (response.status === 200) {
+      const expiryTime = response.data.expires_in * 1000 + Date.now();
+      apiCache.set<AccessTokenResponse>(
+        CacheKeys.AuthData,
+        { ...response.data, expires_in: expiryTime },
+        CacheExpiry.ONE_MONTH
+      );
+      return response.data.access_token;
+    } else {
+      throw response.statusText;
     }
   }
 
-  async getAccessToken(
-    args:
-      | { authorizationCode: string; codeVerifier: string }
-      | undefined = undefined
-  ) {
-    if (args) {
-      try {
-        // If not, proceed to get a new token using the code
-        const url = "https://accounts.spotify.com/api/token";
-        const params = new URLSearchParams({
-          grant_type: "authorization_code",
-          code: args.authorizationCode,
-          redirect_uri: this.redirect_uri,
-          client_id: this.client_id,
-          code_verifier: args.codeVerifier,
-        });
-
-        const response = await axios.post<AccessTokenResponse>(url, params, {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        });
-        if (response.status === 200) {
-          apiCache.set<AccessTokenResponse>(
-            CacheKeys.AuthData,
-            response.data,
-            0
-          );
-          return response.data.access_token;
-        } else {
-          throw response.statusText;
-        }
-      } catch (error) {
-        console.error("Error fetching access token:", error);
-        throw error;
-      }
-    } else {
-      const cacheValue = await apiCache.get<AccessTokenResponse>(
+  async getAccessToken() {
+    try {
+      const authData = await apiCache.get<AccessTokenResponse>(
         CacheKeys.AuthData
       );
-      if (cacheValue && !this.hasExpired(cacheValue.expires_in)) {
-        return cacheValue.access_token;
-      } else if (cacheValue) {
-        const newData = await this.refreshAccessToken(cacheValue.refresh_token);
-        await apiCache.set(CacheKeys.AuthData, newData);
-        return newData.access_token;
-      } else {
-        throw "No Auth Data in Cache";
+      if (authData) {
+        return authData.access_token;
       }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getRefreshToken() {
+    try {
+      const authData = await apiCache.get<AccessTokenResponse>(
+        CacheKeys.AuthData
+      );
+      if (authData) {
+        return authData.refresh_token;
+      }
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -168,13 +190,20 @@ class SpotifySDK {
       }
     }
 
+    const token = await this.refreshAndGetToken();
+
     const url = "https://api.spotify.com/v1/me";
     const response = await axios.get<UserProfile>(url, {
-      headers: this.getAuthorizationHeader(),
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (response.status === 200) {
-      apiCache.set(CacheKeys.UserProfile, response.data);
+      apiCache.set(CacheKeys.UserProfile, {
+        value: response.data,
+        expiresAt: 0,
+      });
       return response.data;
     } else {
       throw response.statusText;
@@ -199,9 +228,12 @@ class SpotifySDK {
       }
     }
 
+    const token = await this.refreshAndGetToken();
     const url = `https://api.spotify.com/v1/me/top/${type}`;
     const response = await axios.get<TopItemResponse>(url, {
-      headers: this.getAuthorizationHeader(),
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (response.status === 200) {

@@ -1,6 +1,5 @@
-import sdk from "@/Data/sdk/DataSource";
-import { store } from "@/Data/state/store";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { store } from "@Data/state/store";
+import { useColorScheme } from "@hooks/useColorScheme";
 import {
   DarkTheme,
   DefaultTheme,
@@ -17,8 +16,8 @@ import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
+import { AuthProvider } from "@context/InitProvider";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -31,32 +30,18 @@ configureReanimatedLogger({
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const insets = useSafeAreaInsets();
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
 
-  useEffect(() => {
-    sdk.initialize();
-  }, []);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView>
         <Provider store={store}>
+          <AuthProvider>
           <Stack>
             <Stack.Screen name="(main)" options={{ headerShown: false }} />
           </Stack>
+          </AuthProvider>
         </Provider>
         <StatusBar style="auto" />
       </GestureHandlerRootView>

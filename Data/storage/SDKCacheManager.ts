@@ -1,3 +1,4 @@
+import { Log as LogUtil } from "@utils/log/Log";
 import { IKeyValueStorage } from "./IKeyValueStorage";
 import keyValueStorage from "./watermelonDB";
 
@@ -12,10 +13,12 @@ export interface CacheConfig {
 /**
  * Cache entry with metadata
  */
-interface CacheEntry<T> {
+export interface CacheEntry<T> {
   value: T;
   expiresAt: number; // Timestamp in milliseconds when entry expires (0 means never expires)
 }
+
+const Log = LogUtil.createTaggedLogger('[SDKCacheManager]');
 
 /**
  * SDK Cache Manager - High-level abstraction for caching operations
@@ -43,7 +46,7 @@ export class SDKCacheManager {
   /**
    * Check if a cache entry is expired
    */
-  private isExpired(entry: CacheEntry<any>): boolean {
+  private isExpired(entry: CacheEntry<unknown>): boolean {
     if (entry.expiresAt === 0) return false; // Never expires
     return Date.now() > entry.expiresAt;
   }
@@ -62,12 +65,8 @@ export class SDKCacheManager {
    */
   async set<T>(key: string, value: T, ttl?: number): Promise<void> {
     const cacheKey = this.getCacheKey(key);
-    const entry: CacheEntry<T> = {
-      value,
-      expiresAt: this.calculateExpiresAt(ttl),
-    };
-
-    await this.storage.set(cacheKey, entry);
+    Log.d(`set: k:${cacheKey}, v:${value}`);
+    await this.storage.set(cacheKey, value);
   }
 
   /**
@@ -77,14 +76,20 @@ export class SDKCacheManager {
     const cacheKey = this.getCacheKey(key);
     const entry = await this.storage.get<CacheEntry<T>>(cacheKey);
 
-    if (!entry) return undefined;
+    if (!entry) {
+      Log.d(`get: k:${cacheKey}, v:undefined`);
+      return undefined;
+    }
+
 
     if (this.isExpired(entry)) {
       // Clean up expired entry
       await this.storage.remove(cacheKey);
+      Log.d(`get: k:${cacheKey}, v:${entry} - Expired`);
       return undefined;
     }
 
+    Log.d(`get: k:${cacheKey}, v:${entry}`);
     return entry.value;
   }
 
@@ -92,8 +97,11 @@ export class SDKCacheManager {
    * Check if a key exists and is not expired
    */
   async has(key: string): Promise<boolean> {
-    const value = await this.get(key);
-    return value !== undefined && value !== null;
+    const cacheKey = this.getCacheKey(key);
+    const value = await this.get(cacheKey);
+    const result =  value !== undefined && value !== null;
+    Log.d(`has: k:${cacheKey} - ${result}`);
+    return result;
   }
 
   /**
@@ -101,6 +109,7 @@ export class SDKCacheManager {
    */
   async remove(key: string): Promise<void> {
     const cacheKey = this.getCacheKey(key);
+    Log.d(`remove: k:${cacheKey}`);
     await this.storage.remove(cacheKey);
   }
 
@@ -114,6 +123,7 @@ export class SDKCacheManager {
     );
 
     if (cacheKeys.length > 0) {
+      Log.d(`clear all`);
       await this.storage.removeMultiple(cacheKeys);
     }
   }
