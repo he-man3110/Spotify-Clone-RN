@@ -1,6 +1,6 @@
 import sdk from "@/Data/sdk/DataSource";
-import { login } from "@/Data/state/account/AccountSlice";
 import { useAppDispatch } from "@/hooks/useStore";
+import { login } from "@Data/state/account/AccountActions";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -33,7 +33,10 @@ export default function LoginScreen() {
   const shouldLoadCallback = (event: ShouldStartLoadRequest) => {
     const { url } = event;
     const urlObj = new URL(url);
-    if (url.startsWith("https://www.hemanth.dev/callback") || urlObj.searchParams.has("code")) {
+    if (
+      url.startsWith("https://www.hemanth.dev/callback") ||
+      urlObj.searchParams.has("code")
+    ) {
       console.log("[WebView] Request to Load Denied For :", url);
       const code = urlObj.searchParams.get("code");
       if (code && codeVerifier.current) {
@@ -41,7 +44,12 @@ export default function LoginScreen() {
           console.log("Authorization code:", code);
           try {
             if (codeVerifier.current) {
-              await dispatch(login({ authorizationCode: code, codeVerifier: codeVerifier.current })).unwrap();
+              await dispatch(
+                login({
+                  authorizationCode: code,
+                  codeVerifier: codeVerifier.current,
+                })
+              ).unwrap();
             }
           } catch (e) {
             // Handle error

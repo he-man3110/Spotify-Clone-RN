@@ -1,38 +1,45 @@
-import { TopItemType } from "@/Data/sdk/CommonTypes";
-import sdk from "@/Data/sdk/DataSource";
 import { TopItem } from "@/Data/sdk/types/TopItemResponse";
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+import {
+  loadAuthenticationStatus,
+  loadUserProfile,
+  loadUsersTopItems,
+  login,
+} from "./AccountActions";
+import Log from "@utils/log/Log";
 
 type Size = { height: number; width: number };
 
+export const AccountSliceState = {
+  auth: {
+    token: undefined as string | undefined,
+    isAuthenticated: false as boolean,
+  },
+  details: {
+    id: undefined as string | undefined,
+    displayName: undefined as string | undefined,
+    email: undefined as string | undefined,
+    country: undefined as string | undefined,
+
+    profileIcon: {
+      uri: undefined as string | undefined,
+      size: undefined as undefined | Size,
+    },
+    isPremiumAccount: false as boolean,
+    isLoading: true as boolean,
+    isAvailable: false as boolean,
+    isRefreshing: false as boolean,
+  },
+  topArtists: {
+    list: [] as Array<TopItem>,
+    isLoading: true as boolean,
+    isAvailable: false as boolean,
+  },
+};
+
 const accountSlice = createSlice({
   name: "AccountSlice",
-  initialState: {
-    auth: {
-      token: undefined as string | undefined,
-      isAuthenticated: false as boolean,
-    },
-    details: {
-      id: undefined as string | undefined,
-      displayName: undefined as string | undefined,
-      email: undefined as string | undefined,
-      country: undefined as string | undefined,
-
-      profileIcon: {
-        uri: undefined as string | undefined,
-        size: undefined as undefined | Size,
-      },
-      isPremiumAccount: false as boolean,
-      isLoading: true as boolean,
-      isAvailable: false as boolean,
-      isRefreshing: false as boolean,
-    },
-    topArtists: {
-      list: [] as Array<TopItem>,
-      isLoading: true as boolean,
-      isAvailable: false as boolean,
-    },
-  },
+  initialState: AccountSliceState,
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -99,53 +106,5 @@ const accountSlice = createSlice({
       });
   },
 });
-
-export const login = createAsyncThunk(
-  "AccountSlice/login",
-  async (props: { authorizationCode: string; codeVerifier: string }) => {
-    try {
-      return await sdk.login(props);
-    } catch (error) {
-      throw error;
-    }
-  }
-);
-
-export const loadAuthenticationStatus = createAsyncThunk(
-  "AccountSlice/loadAuthenticationStatus",
-  async () => {
-    try {
-      const isAuthenticated = await sdk.isUserAuthenticated();
-      return isAuthenticated;
-    } catch (error) {
-      throw error;
-    }
-  }
-);
-
-export const loadUserProfile = createAsyncThunk(
-  "AccountSlice/loadUserProfile",
-  async () => {
-    try {
-      const response = await sdk.getUserProfile();
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  }
-);
-
-export const loadUsersTopItems = createAsyncThunk(
-  "AccountSlice/loadUsersTopItems",
-  async (arg: { type: TopItemType }) => {
-    try {
-      const result = await sdk.getUsersTopItem(arg);
-      console.log("Top items loaded:", result);
-      return result;
-    } catch (error) {
-      throw error;
-    }
-  }
-);
 
 export default accountSlice.reducer;

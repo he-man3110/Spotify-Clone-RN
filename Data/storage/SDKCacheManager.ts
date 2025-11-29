@@ -18,7 +18,7 @@ export interface CacheEntry<T> {
   expiresAt: number; // Timestamp in milliseconds when entry expires (0 means never expires)
 }
 
-const Log = LogUtil.createTaggedLogger('[SDKCacheManager]');
+const Log = LogUtil.createTaggedLogger("[SDKCacheManager]");
 
 /**
  * SDK Cache Manager - High-level abstraction for caching operations
@@ -43,6 +43,16 @@ export class SDKCacheManager {
     return `${this.config.keyPrefix}${key}`;
   }
 
+  private enrichCacheValue<T>(value: T, ttl?: number): CacheEntry<T> {
+    let expiresAt;
+    if (ttl) {
+      expiresAt = Date.now() + ttl;
+    } else {
+      expiresAt = Date.now() + this.config.defaultTTL;
+    }
+    return { value, expiresAt };
+  }
+
   /**
    * Check if a cache entry is expired
    */
@@ -65,8 +75,9 @@ export class SDKCacheManager {
    */
   async set<T>(key: string, value: T, ttl?: number): Promise<void> {
     const cacheKey = this.getCacheKey(key);
+    const _value = this.enrichCacheValue(value, ttl);
     Log.d(`set: k:${cacheKey}, v:${value}`);
-    await this.storage.set(cacheKey, value);
+    await this.storage.set(cacheKey, _value);
   }
 
   /**
@@ -81,7 +92,6 @@ export class SDKCacheManager {
       return undefined;
     }
 
-
     if (this.isExpired(entry)) {
       // Clean up expired entry
       await this.storage.remove(cacheKey);
@@ -89,7 +99,7 @@ export class SDKCacheManager {
       return undefined;
     }
 
-    Log.d(`get: k:${cacheKey}, v:${entry}`);
+    Log.d(`get: k:${cacheKey}, v:${entry.value}`);
     return entry.value;
   }
 
@@ -97,10 +107,9 @@ export class SDKCacheManager {
    * Check if a key exists and is not expired
    */
   async has(key: string): Promise<boolean> {
-    const cacheKey = this.getCacheKey(key);
-    const value = await this.get(cacheKey);
-    const result =  value !== undefined && value !== null;
-    Log.d(`has: k:${cacheKey} - ${result}`);
+    const value = await this.get(key);
+    const result = value !== undefined && value !== null;
+    Log.d(`has: k:${key} - ${result}`);
     return result;
   }
 

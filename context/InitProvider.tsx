@@ -1,5 +1,5 @@
 import sdk from "@Data/sdk/DataSource";
-import { loadAuthenticationStatus } from "@Data/state/account/AccountSlice";
+import { loadAuthenticationStatus } from "@Data/state/account/AccountActions";
 import { useAppInit } from "@hooks/useAppInit.hook";
 import { useAppDispatch } from "@hooks/useStore";
 import * as SplashScreen from "expo-splash-screen";

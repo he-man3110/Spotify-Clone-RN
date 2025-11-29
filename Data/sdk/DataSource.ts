@@ -125,6 +125,34 @@ class SpotifySDK {
     return await apiCache.has(CacheKeys.AuthData);
   }
 
+  async getAccessToken() {
+    try {
+      const authData = await apiCache.get<AccessTokenResponse>(
+        CacheKeys.AuthData
+      );
+      if (authData) {
+        return authData.access_token;
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getRefreshToken() {
+    try {
+      const authData = await apiCache.get<AccessTokenResponse>(
+        CacheKeys.AuthData
+      );
+      if (authData) {
+        return authData.refresh_token;
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // --------------------- APIs ---------------------
+
   async login(args: { authorizationCode: string; codeVerifier: string }) {
     const url = "https://accounts.spotify.com/api/token";
     const params = new URLSearchParams({
@@ -149,32 +177,6 @@ class SpotifySDK {
       return response.data.access_token;
     } else {
       throw response.statusText;
-    }
-  }
-
-  async getAccessToken() {
-    try {
-      const authData = await apiCache.get<AccessTokenResponse>(
-        CacheKeys.AuthData
-      );
-      if (authData) {
-        return authData.access_token;
-      }
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getRefreshToken() {
-    try {
-      const authData = await apiCache.get<AccessTokenResponse>(
-        CacheKeys.AuthData
-      );
-      if (authData) {
-        return authData.refresh_token;
-      }
-    } catch (error) {
-      throw error;
     }
   }
 
