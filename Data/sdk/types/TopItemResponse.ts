@@ -1,4 +1,4 @@
-import { Image } from "./UserProfileResponse";
+import { SptImage } from "./SptImage";
 
 export type TopItemResponse = {
   limit: number;
@@ -13,7 +13,7 @@ export type TopItem = {
   };
   genres: Array<string>;
   id: string;
-  images: Array<Image>;
+  images: Array<SptImage>;
   name: string;
   popularity: number;
   type: string;

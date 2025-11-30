@@ -3,18 +3,23 @@ import { Buffer } from "buffer";
 import * as Crypto from "expo-crypto";
 import AppCredentials from "../../app.credentials.json";
 import { apiCache } from "../storage/SDKCacheManager";
-import { CacheKeys } from "./CacheKeys";
-import { TopItemType } from "./CommonTypes";
+import { CacheKeys, getKeyForListRange } from "./CacheKeys";
+import { UsersTopItemRequest } from "./types/request/UsersTopItemRequest";
 import { AccessTokenResponse } from "./types/AccessTokenResponse";
 import { TopItemResponse } from "./types/TopItemResponse";
 import { UserProfile } from "./types/UserProfileResponse";
 import { CacheExpiry } from "./CacheExpiry";
 import { Log as Logger } from "@utils/log/Log";
+import { SDKListRange, SDKRequest } from "./SDKTypes";
+import { addListRangeParams } from "./utils/GeneralUtils";
+import { PlayList } from "./types/Playlist";
+import { List } from "./types/List";
 
 export type AuthorizationCode = string;
 
 const Log = Logger.createTaggedLogger("[SDK]");
 
+// TODO: Structure APIs, common base urls.
 class SpotifySDK {
   private client_id: string;
   private client_secret: string;
@@ -106,7 +111,7 @@ class SpotifySDK {
 
     const url = new URL("https://accounts.spotify.com/authorize");
     const scope =
-      "user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control user-follow-read user-follow-modify user-read-playback-position user-top-read user-read-recently-played";
+      "user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control user-follow-read user-follow-modify user-read-playback-position user-top-read user-read-recently-played playlist-read-private playlist-read-collaborative";
     const params = {
       response_type: "code",
       client_id: this.client_id,
@@ -214,15 +219,13 @@ class SpotifySDK {
 
   async getUsersTopItem({
     type,
-    offset,
     refreshCache,
-  }: {
-    type: TopItemType;
-    offset?: number;
-    refreshCache?: boolean;
-  }) {
-    const cacheKey =
-      CacheKeys.TopItems + ":" + type + (offset ? `:${offset}` : "");
+    ...listRange
+  }: SDKRequest<SDKListRange<UsersTopItemRequest>>) {
+    const cacheKey = getKeyForListRange(
+      CacheKeys.TopItems + ":" + type,
+      listRange
+    );
     if (!refreshCache) {
       const cached = await apiCache.get<TopItemResponse>(cacheKey);
       if (cached) {
@@ -231,8 +234,43 @@ class SpotifySDK {
     }
 
     const token = await this.refreshAndGetToken();
-    const url = `https://api.spotify.com/v1/me/top/${type}`;
-    const response = await axios.get<TopItemResponse>(url, {
+    const url = new URL(`https://api.spotify.com/v1/me/top/${type}`);
+    addListRangeParams(url, listRange);
+
+    const response = await axios.get<TopItemResponse>(url.href, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 200) {
+      apiCache.set(cacheKey, response.data);
+      return response.data;
+    } else {
+      throw response.statusText;
+    }
+  }
+
+  async getUsersPlaylists({
+    refreshCache,
+    ...listRange
+  }: SDKRequest<SDKListRange>): Promise<List<PlayList>> {
+    const cacheKey = getKeyForListRange(CacheKeys.UserPlaylists, listRange);
+    if (!refreshCache) {
+      const cache = await apiCache.get<List<PlayList>>(cacheKey);
+      if (cache) {
+        return cache;
+      }
+    }
+
+    const userData = await apiCache.get<UserProfile>(CacheKeys.UserProfile);
+    const userId = userData?.id;
+
+    const url = new URL(`https://api.spotify.com/v1/users/${userId}/playlists`);
+    addListRangeParams(url, listRange);
+
+    const token = await this.refreshAndGetToken();
+    const response = await axios.get<List<PlayList>>(url.href, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

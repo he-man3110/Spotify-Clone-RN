@@ -1,12 +1,9 @@
-import { TopItem } from "@/Data/sdk/types/TopItemResponse";
 import { createSlice } from "@reduxjs/toolkit";
 import {
   loadAuthenticationStatus,
   loadUserProfile,
-  loadUsersTopItems,
   login,
 } from "./AccountActions";
-import Log from "@utils/log/Log";
 
 type Size = { height: number; width: number };
 
@@ -29,11 +26,6 @@ export const AccountSliceState = {
     isLoading: true as boolean,
     isAvailable: false as boolean,
     isRefreshing: false as boolean,
-  },
-  topArtists: {
-    list: [] as Array<TopItem>,
-    isLoading: true as boolean,
-    isAvailable: false as boolean,
   },
 };
 
@@ -90,19 +82,6 @@ const accountSlice = createSlice({
       })
       .addCase(loadUserProfile.rejected, (state, action) => {
         state.details.isAvailable = false;
-      })
-
-      .addCase(loadUsersTopItems.pending, (state, action) => {
-        state.topArtists.isLoading = true;
-      })
-      .addCase(loadUsersTopItems.fulfilled, (state, action) => {
-        state.topArtists.list = action.payload.items;
-        state.topArtists.isLoading = false;
-        state.topArtists.isAvailable = true;
-      })
-      .addCase(loadUsersTopItems.rejected, (state, action) => {
-        state.topArtists.isLoading = false;
-        state.topArtists.isAvailable = false;
       });
   },
 });

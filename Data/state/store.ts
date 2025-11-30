@@ -5,10 +5,12 @@ import {
   ThunkAction,
 } from "@reduxjs/toolkit";
 import accountReducer from "../state/account/AccountSlice";
+import libraryReducer from "../state/library/LibrarySlice";
 
 export const store = configureStore({
   reducer: combineReducers({
     account: accountReducer,
+    library: libraryReducer,
   }),
 });
 
