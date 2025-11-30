@@ -1,39 +1,85 @@
-import { TopItem } from "@/Data/sdk/CommonTypes";
-import { loadUsersTopItems } from "@/Data/state/account/AccountSlice";
+import { TopItem } from "@/Data/sdk/types/TopItemResponse";
 import { useAppDispatch, useAppSelector } from "@/hooks/useStore";
+import { SptImage } from "@Data/sdk/types/SptImage";
+import { loadTopHomeItems } from "@Data/state/library/LibraryActions";
+import { selectUsersHomeItems } from "@Data/state/library/LibrarySelectors";
+import { isLoading, isNotAvailable } from "@utils/CommonUtils";
 import { Image } from "expo-image";
 import React, { useEffect } from "react";
-import { Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import Animated from "react-native-reanimated";
 
 function RecentsView() {
+  const styles = createRecentsViewStyles();
   const dispatch = useAppDispatch();
-  const { isAvailable } = useAppSelector((state) => state.account.topArtists);
+  const { contentStatus, list } = useAppSelector(selectUsersHomeItems);
 
   useEffect(() => {
-    if (!isAvailable) {
-      dispatch(loadUsersTopItems({ type: "artists" }));
+    if (isNotAvailable(contentStatus) && !isLoading(contentStatus)) {
+      dispatch(loadTopHomeItems());
     }
   }, []);
 
   return (
-    <Animated.View>
-      <Animated.Text>Recents</Animated.Text>
+    <Animated.View style={{ borderWidth: 1, borderColor: "purple" }}>
+      <Animated.Text>Your top tracks</Animated.Text>
+      <View style={styles.container}>
+        {list.slice(0, 6).map((d, index) => (
+          <RecentItem key={index} {...d} />
+        ))}
+      </View>
     </Animated.View>
   );
 }
 
-const RecentItem = ({ name, images }: TopItem) => {
+const createRecentsViewStyles = () => {
+  return StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      gap: 8,
+      flexWrap: "wrap",
+      justifyContent: "center",
+    },
+  });
+};
+
+const RecentItem = ({ title, image }: { title: string; image: SptImage }) => {
+  const styles = createRecentItemStyles();
+
   return (
-    <Animated.View>
+    <Animated.View style={styles.container}>
       <Image
-        source={images.at(0)?.url}
-        style={[{ width: images.at(0)?.width, height: images.at(0)?.height }]}
+        source={image.url}
+        style={[{ width: image.width, height: image.height }, styles.image]}
       />
-      <Text></Text>
-      <Text></Text>
+      <Text style={styles.title}>{title}</Text>
     </Animated.View>
   );
+};
+
+const createRecentItemStyles = () => {
+  return StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      borderRadius: 4,
+      backgroundColor: "#343333",
+      minWidth: "46%",
+      overflow: "hidden",
+      alignItems: "center",
+      columnGap: 6,
+    },
+    image: {
+      width: 60,
+      height: 60,
+      borderRadius: 4,
+    },
+    title: {
+      flex: 1,
+      fontWeight: "700",
+      fontSize: 12,
+      color: "#FCFCFC",
+    },
+  });
 };
 
 export default RecentsView;

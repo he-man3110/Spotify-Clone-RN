@@ -4,9 +4,11 @@
     "moduleResolution": "bundler",
     "strict": true,
     "paths": {
-      "@/*": ["./*"]
+      "@*": ["./*"]
     },
-    "types": ["react", "react-native"]
+    "types": ["react", "react-native"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }

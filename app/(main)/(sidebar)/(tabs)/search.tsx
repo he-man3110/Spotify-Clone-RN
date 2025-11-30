@@ -2,6 +2,7 @@ import Categories, { Category } from "@/components/Search/Categories";
 import DiscoverList from "@/components/Search/DiscoverList";
 import SearchBar from "@/components/Search/SearchBar";
 import SearchHeader from "@/components/Search/SearchHeader";
+import allCategories from "@/Data/Browse/BrowseCategories.json";
 import { FlashList, ListRenderItemInfo } from "@shopify/flash-list";
 import React, { useCallback, useMemo } from "react";
 import { StyleSheet, Text } from "react-native";
@@ -11,7 +12,6 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
-import allCategories from "../../Data/Browse/BrowseCategories.json";
 
 const categories: Array<Category> = [
   {
@@ -161,7 +161,7 @@ export default function Search() {
             scrollY.value = y;
           }}
           contentContainerStyle={styles.listContent}
-          estimatedItemSize={80}
+          // estimatedItemSize={80}
           showsVerticalScrollIndicator={true}
           renderItem={renderItem}
         />
