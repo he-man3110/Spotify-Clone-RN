@@ -4,8 +4,8 @@ import {
   configureStore,
   ThunkAction,
 } from "@reduxjs/toolkit";
-import accountReducer from "../state/account/AccountSlice";
-import libraryReducer from "../state/library/LibrarySlice";
+import accountReducer from "./account/AccountSlice";
+import libraryReducer from "./library/LibrarySlice";
 
 export const store = configureStore({
   reducer: combineReducers({

@@ -1,4 +1,4 @@
-import { ColorUtils } from "@/utils/ColorUtils";
+import { ColorUtils } from "@utils/ColorUtils";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";

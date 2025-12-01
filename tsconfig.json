@@ -4,7 +4,14 @@
     "moduleResolution": "bundler",
     "strict": true,
     "paths": {
-      "@*": ["./*"]
+      "@app/*": ["./app/*"],
+      "@assets/*": ["./assets/*"],
+      "@components/*": ["./components/*"],
+      "@constants/*": ["./constants/*"],
+      "@context/*": ["./context/*"],
+      "@data/*": ["./data/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@utils/*": ["./utils/*"],
     },
     "types": ["react", "react-native"],
     "experimentalDecorators": true,

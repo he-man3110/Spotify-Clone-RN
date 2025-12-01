@@ -1,4 +1,4 @@
-import SpotSdk from "@/Data/sdk/DataSource";
+import SpotSdk from "@data/sdk/DataSource";
 import { createAppAsyncThunk } from "../withTypes";
 import Logger from "@utils/log/Log";
 

@@ -1,8 +1,8 @@
-import { UsersTopItemRequest } from "@Data/sdk/types/request/UsersTopItemRequest";
+import { UsersTopItemRequest } from "@data/sdk/types/request/UsersTopItemRequest";
 import { createAppAsyncThunk } from "../withTypes";
 import Logger from "@utils/log/Log";
-import SpotSdk from "@/Data/sdk/DataSource";
-import { SDKListRange } from "@Data/sdk/SDKTypes";
+import SpotSdk from "@data/sdk/DataSource";
+import { SDKListRange } from "@data/sdk/SDKTypes";
 
 const Log = Logger.createTaggedLogger("LibraryActions");
 

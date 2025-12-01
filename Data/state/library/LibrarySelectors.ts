@@ -1,4 +1,4 @@
-import { SptImage } from "@Data/sdk/types/SptImage";
+import { SptImage } from "@data/sdk/types/SptImage";
 import { ContentStatus } from "../common/CommonTypes";
 import { RootState } from "../store";
 import { isAllAvailable } from "@utils/CommonUtils";

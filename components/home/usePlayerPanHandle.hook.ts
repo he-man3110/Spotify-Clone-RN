@@ -1,4 +1,4 @@
-import { ColorUtils, HexColorValue } from "@/utils/ColorUtils";
+import { ColorUtils, HexColorValue } from "@utils/ColorUtils";
 import { useWindowDimensions } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import Animated, {

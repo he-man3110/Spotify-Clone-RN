@@ -1,4 +1,4 @@
-import { HexColorValue } from "@/utils/ColorUtils";
+import { HexColorValue } from "@utils/ColorUtils";
 import React from "react";
 import { StyleProp, StyleSheet, ViewStyle } from "react-native";
 import Animated, { AnimatedStyle } from "react-native-reanimated";

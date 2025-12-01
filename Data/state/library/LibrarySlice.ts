@@ -1,8 +1,8 @@
-import { createSlice } from "@node_modules/@reduxjs/toolkit/dist/index.mjs";
+import { createSlice } from "@reduxjs/toolkit";
 import { ContentStatus } from "../common/CommonTypes";
-import { TopItem } from "@Data/sdk/types/TopItemResponse";
+import { TopItem } from "@data/sdk/types/TopItemResponse";
 import { loadUsersPlaylists, loadUsersTopItems } from "./LibraryActions";
-import { PlayList } from "@Data/sdk/types/Playlist";
+import { PlayList } from "@data/sdk/types/Playlist";
 
 export const LibrarySliceState = {
   playlists: {

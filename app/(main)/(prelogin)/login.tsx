@@ -1,6 +1,6 @@
-import sdk from "@/Data/sdk/DataSource";
-import { useAppDispatch } from "@/hooks/useStore";
-import { login } from "@Data/state/account/AccountActions";
+import sdk from "@data/sdk/DataSource";
+import { useAppDispatch } from "@hooks/useStore";
+import { login } from "@data/state/account/AccountActions";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,

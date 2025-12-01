@@ -10,10 +10,13 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "format:staged": "prettier --write",
-    "open:xcode": "cd ios && xed spotifyclone.xcworkspace && cd .."
+    "open:xcode": "cd ios && xed spotifyclone.xcworkspace && cd ..",
+    "build": "tsc --noEmit && expo export"
   },
   "jest": {
     "preset": "jest-expo"

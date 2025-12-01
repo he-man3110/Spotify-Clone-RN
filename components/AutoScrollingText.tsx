@@ -1,4 +1,4 @@
-import { ColorUtils, HexColorValue } from "@/utils/ColorUtils";
+import { ColorUtils, HexColorValue } from "@utils/ColorUtils";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { PropsWithChildren, useEffect } from "react";
 import {

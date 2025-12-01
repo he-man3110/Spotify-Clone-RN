@@ -1,8 +1,7 @@
-import { TopItem } from "@/Data/sdk/types/TopItemResponse";
-import { useAppDispatch, useAppSelector } from "@/hooks/useStore";
-import { SptImage } from "@Data/sdk/types/SptImage";
-import { loadTopHomeItems } from "@Data/state/library/LibraryActions";
-import { selectUsersHomeItems } from "@Data/state/library/LibrarySelectors";
+import { useAppDispatch, useAppSelector } from "@hooks/useStore";
+import { SptImage } from "@data/sdk/types/SptImage";
+import { loadTopHomeItems } from "@data/state/library/LibraryActions";
+import { selectUsersHomeItems } from "@data/state/library/LibrarySelectors";
 import { isLoading, isNotAvailable } from "@utils/CommonUtils";
 import { Image } from "expo-image";
 import React, { useEffect } from "react";

@@ -39,6 +39,7 @@ app-example
 
 .lh
 ./*lock.json
+yarn.lock
 
 ios/
 *.json
