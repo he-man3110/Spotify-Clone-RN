@@ -1,8 +1,9 @@
+import { PlayList } from "@data/sdk/types/Playlist";
+import { Artist } from "@data/sdk/types/top-items/Artist";
+import { Track } from "@data/sdk/types/top-items/Track";
 import { createSlice } from "@reduxjs/toolkit";
 import { ContentStatus } from "../common/CommonTypes";
-import { TopItem } from "@data/sdk/types/TopItemResponse";
 import { loadUsersPlaylists, loadUsersTopItems } from "./LibraryActions";
-import { PlayList } from "@data/sdk/types/Playlist";
 
 export const LibrarySliceState = {
   playlists: {
@@ -11,13 +12,13 @@ export const LibrarySliceState = {
   },
   tracks: {
     top: {
-      list: [] as Array<TopItem>,
+      list: [] as Array<Track>,
       contentStatus: "unavailable" as ContentStatus,
     },
   },
   artists: {
     top: {
-      list: [] as Array<TopItem>,
+      list: [] as Array<Artist>,
       contentStatus: "unavailable" as ContentStatus,
     },
   },
@@ -48,11 +49,12 @@ const librarySlice = createSlice({
         }
       })
       .addCase(loadUsersTopItems.fulfilled, (state, action) => {
+        const list = action.payload.items;
         if (action.meta.arg.type === "artists") {
-          state.artists.top.list = action.payload.items;
+          state.artists.top.list = list as Array<Artist>;
           state.artists.top.contentStatus = "available";
         } else {
-          state.tracks.top.list = action.payload.items;
+          state.tracks.top.list = list as Array<Track>;
           state.tracks.top.contentStatus = "available";
         }
       })
@@ -69,6 +71,7 @@ const librarySlice = createSlice({
       })
       .addCase(loadUsersPlaylists.fulfilled, (state, action) => {
         state.playlists.list = action.payload.items;
+        state.playlists.contentStatus = "available";
       })
       .addCase(loadUsersPlaylists.rejected, (state, action) => {
         if (!action.meta.aborted) {

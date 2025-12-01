@@ -1,14 +1,18 @@
-import { useAppDispatch, useAppSelector } from "@hooks/useStore";
 import { SptImage } from "@data/sdk/types/SptImage";
 import { loadTopHomeItems } from "@data/state/library/LibraryActions";
 import { selectUsersHomeItems } from "@data/state/library/LibrarySelectors";
+import { useAppDispatch, useAppSelector } from "@hooks/useStore";
 import { isLoading, isNotAvailable } from "@utils/CommonUtils";
 import { Image } from "expo-image";
 import React, { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
 import Animated from "react-native-reanimated";
 
-function RecentsView() {
+export type RecentsViewProps = {
+  style?: StyleProp<ViewStyle>;
+};
+
+function RecentsView({ style }: RecentsViewProps) {
   const styles = createRecentsViewStyles();
   const dispatch = useAppDispatch();
   const { contentStatus, list } = useAppSelector(selectUsersHomeItems);
@@ -20,8 +24,7 @@ function RecentsView() {
   }, []);
 
   return (
-    <Animated.View style={{ borderWidth: 1, borderColor: "purple" }}>
-      <Animated.Text>Your top tracks</Animated.Text>
+    <Animated.View style={[style]}>
       <View style={styles.container}>
         {list.slice(0, 6).map((d, index) => (
           <RecentItem key={index} {...d} />

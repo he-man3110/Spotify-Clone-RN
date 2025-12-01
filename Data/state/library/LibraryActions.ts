@@ -1,8 +1,8 @@
-import { UsersTopItemRequest } from "@data/sdk/types/request/UsersTopItemRequest";
-import { createAppAsyncThunk } from "../withTypes";
-import Logger from "@utils/log/Log";
 import SpotSdk from "@data/sdk/DataSource";
-import { SDKListRange } from "@data/sdk/SDKTypes";
+import { SDKListRange, SDKRequest } from "@data/sdk/SDKTypes";
+import { UsersTopItemRequest } from "@data/sdk/types/top-items/UsersTopItemRequest";
+import Logger from "@utils/log/Log";
+import { createAppAsyncThunk } from "../withTypes";
 
 const Log = Logger.createTaggedLogger("LibraryActions");
 
@@ -21,10 +21,10 @@ export const loadUsersTopItems = createAppAsyncThunk(
 
 export const loadUsersPlaylists = createAppAsyncThunk(
   "LibrarySlice/loadUsersPlaylists",
-  async (arg: SDKListRange | undefined = {}) => {
+  async (arg: SDKRequest<SDKListRange> | undefined = {}) => {
     try {
       const result = await SpotSdk.getUsersPlaylists(arg);
-      Log.v(`Users Playlists : ${result}`);
+      Log.d(`Users Playlists : ${result}`);
       return result;
     } catch (error) {
       throw error;
@@ -38,7 +38,7 @@ export const loadTopHomeItems = createAppAsyncThunk(
     try {
       thunkAPI.dispatch(loadUsersTopItems({ type: "tracks", limit: 5 }));
       thunkAPI.dispatch(loadUsersTopItems({ type: "artists", limit: 5 }));
-      thunkAPI.dispatch(loadUsersPlaylists());
+      thunkAPI.dispatch(loadUsersPlaylists({}));
     } catch (error) {
       throw error;
     }
