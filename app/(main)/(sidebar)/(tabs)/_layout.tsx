@@ -14,7 +14,7 @@ export default function TabLayout() {
       tabBar={(props) => {
         return <BottomTabBar {...props} />;
       }}
-      initialRouteName="home"
+      initialRouteName="index"
       screenOptions={{
         headerShown: false,
         tabBarActiveBackgroundColor: "red",

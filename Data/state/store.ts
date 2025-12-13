@@ -10,6 +10,7 @@ import { AppConfig } from "@utils/AppConfig";
 import { createLogger } from "redux-logger";
 import accountReducer from "./account/AccountSlice";
 import libraryReducer from "./library/LibrarySlice";
+import playerReducer from "./player/PlayerSlice";
 
 const middlewares: Array<Middleware> = [];
 
@@ -32,6 +33,7 @@ export const store = configureStore({
   reducer: combineReducers({
     account: accountReducer,
     library: libraryReducer,
+    player: playerReducer,
   }),
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware(middlewareOptions()).concat(...middlewares);

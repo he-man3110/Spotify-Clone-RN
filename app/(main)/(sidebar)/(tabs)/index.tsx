@@ -1,9 +1,26 @@
 import RecentsView from "@components/home/Recents/RecentsView";
 import ScreenHeader from "@components/ScreenHeader";
-import React from "react";
+import { getCurrentlyPlaying } from "@data/state/player/PlayerActions";
+import { useAppDispatch } from "@hooks/useStore";
+import React, { useEffect, useRef } from "react";
 import { ScrollView, View } from "react-native";
 
 export default function Home() {
+  const dispatch = useAppDispatch();
+  const timeoutTask = useRef<number>(null);
+
+  useEffect(() => {
+    timeoutTask.current = setInterval(() => {
+      dispatch(getCurrentlyPlaying());
+    }, 15_000);
+
+    return () => {
+      if (timeoutTask.current) {
+        clearInterval(timeoutTask.current);
+      }
+    };
+  }, []);
+
   return (
     <View style={{ flex: 1 }}>
       <ScreenHeader />

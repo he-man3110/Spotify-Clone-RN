@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -16,19 +16,49 @@ import RepeatButton from "./RepeatButton";
 const HANDLE_SIZE = 12;
 const SEEKER_PADDING = 8;
 
-function MusicControls() {
-  const styles = createMusicControlStyles();
+export type MusicControlsProps = {
+  isPlaying: boolean;
+  currentMs?: number;
+  totalMs?: number;
+};
 
-  const width = useSharedValue<number>(0);
+function MusicControls({
+  isPlaying,
+  currentMs = 0,
+  totalMs = 1,
+}: MusicControlsProps) {
+  const styles = createMusicControlStyles();
+  const timeoutTask = useRef<number>(null);
 
   const seekerX = useSharedValue(-SEEKER_PADDING);
-  const seekerPosX = useSharedValue(0);
+  const prvX = useSharedValue(0);
   const seekerScale = useSharedValue(1);
+
+  const width = useSharedValue<number>(0);
   const progressBarWidth = useDerivedValue(() => {
     return seekerX.value + SEEKER_PADDING + HANDLE_SIZE / 2;
   });
 
-  const progress = useSharedValue(0);
+  const progressMs = useSharedValue(currentMs);
+
+  useEffect(() => {
+    timeoutTask.current = setInterval(() => {
+      progressMs.value += 1_000;
+
+      let progress;
+      if (!currentMs || !totalMs || totalMs === 0) progress = 0;
+      else progress = Math.min(1, Math.max(0, progressMs.value / totalMs));
+
+      const progressWidth = width.value * progress;
+      seekerX.value = progressWidth - 2 * SEEKER_PADDING - HANDLE_SIZE;
+    }, 1_000);
+
+    return () => {
+      if (timeoutTask.current) {
+        clearInterval(timeoutTask.current);
+      }
+    };
+  }, [currentMs]);
 
   const panGesture = Gesture.Pan()
     .minDistance(1)
@@ -36,7 +66,7 @@ function MusicControls() {
       seekerScale.value = 1.2;
     })
     .onUpdate((e) => {
-      const posX = seekerPosX.value + e.translationX;
+      const posX = prvX.value + e.translationX;
       seekerX.value = clamp(
         posX,
         -SEEKER_PADDING,
@@ -44,7 +74,7 @@ function MusicControls() {
       );
     })
     .onEnd((e) => {
-      seekerPosX.value = seekerX.value;
+      prvX.value = seekerX.value;
     })
     .onTouchesUp((e) => {
       seekerScale.value = 1;
@@ -91,13 +121,13 @@ function MusicControls() {
       <View style={styles.controlsContainer}>
         <RandomizeButton />
         <PressableIcon
-          source={require("../../assets/svgs/previous.svg")}
+          source={require("@assets/svgs/previous.svg")}
           imageStyle={{ width: 22, height: 22, tintColor: "#fff" }}
           onPress={onPrevious}
         />
-        <PlayButton mode="large" />
+        <PlayButton isPlaying={isPlaying} mode="large" />
         <PressableIcon
-          source={require("../../assets/svgs/next.svg")}
+          source={require("@assets/svgs/next.svg")}
           imageStyle={{ width: 22, height: 22, tintColor: "#fff" }}
           onPress={onNext}
         />
@@ -136,7 +166,7 @@ const createMusicControlStyles = () => {
     },
     seekerHandle: {
       position: "absolute",
-      padding: 8,
+      padding: SEEKER_PADDING,
     },
     timeContainer: {
       flexDirection: "row",

@@ -1,3 +1,5 @@
+import { selectCurrentlyPlaying } from "@data/state/player/PlayerSelectors";
+import { useAppSelector } from "@hooks/useStore";
 import { Image } from "expo-image";
 import React from "react";
 import { StyleProp, StyleSheet, Text, ViewStyle } from "react-native";
@@ -14,6 +16,9 @@ function NowPlayingView({
   playlist?: string;
   style?: StyleProp<AnimatedStyle<ViewStyle>>;
 }) {
+  const { title, author, isPlaying, image, progressMs, totalMs } =
+    useAppSelector(selectCurrentlyPlaying);
+
   return (
     <Animated.View style={[{ flex: 1 }, style]}>
       <HeaderView playlist={playlist} />
@@ -25,6 +30,7 @@ function NowPlayingView({
       >
         <Image
           source={
+            image?.url ??
             "https://i.scdn.co/image/ab67616d0000b2734ae1c4c5c45aabe565499163"
           }
           style={{
@@ -36,9 +42,13 @@ function NowPlayingView({
         />
       </Animated.View>
       <Animated.View style={{ height: 64 }} />
-      <MusicDetail />
+      <MusicDetail song={title} artist={author} />
       <Animated.View style={{ paddingHorizontal: 16, gap: 16 }}>
-        <MusicControls />
+        <MusicControls
+          isPlaying={isPlaying}
+          currentMs={progressMs}
+          totalMs={totalMs}
+        />
         <HStack>
           <PressableIcon
             onPress={() => {}}

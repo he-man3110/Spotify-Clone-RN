@@ -14,6 +14,15 @@ export interface Artist {
   uri: SpotifyURI;
 }
 
+export interface SimplifiedArtist {
+  external_urls: ExternalUrls;
+  href: string;
+  id: string;
+  name: string;
+  type: "artist";
+  uri: SpotifyURI;
+}
+
 export function isArtist(value: object): value is Artist {
   return "type" in value && value.type === "artist";
 }

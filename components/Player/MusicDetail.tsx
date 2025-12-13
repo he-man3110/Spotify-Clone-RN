@@ -20,10 +20,10 @@ const MusicDetail = ({
   return (
     <HStack style={{ paddingEnd: 16, gap: 16 }}>
       <Animated.View style={styles.detailContainer}>
-        <AutoScrollingText style={styles.songLabel} color="#5D6E83">
+        <AutoScrollingText style={styles.songLabel} color="#121212">
           {song}
         </AutoScrollingText>
-        <AutoScrollingText style={styles.artistLabel} color="#5D6E83">
+        <AutoScrollingText style={styles.artistLabel} color="#121212">
           {artist}
         </AutoScrollingText>
       </Animated.View>

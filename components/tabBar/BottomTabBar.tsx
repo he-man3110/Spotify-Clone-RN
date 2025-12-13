@@ -1,5 +1,5 @@
-import { ColorUtils } from "@utils/ColorUtils";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { ColorUtils } from "@utils/ColorUtils";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
@@ -33,7 +33,7 @@ export default function BottomTabBar(props: BottomTabBarProps) {
   } = usePlayerPanHandle({
     miniPlayerHeight: MINI_PLAYER_HEIGHT,
     bottomTabBarHeight: BOTTOM_TAB_BAR_HEIGHT,
-    backgroundColor: "#32CD32",
+    backgroundColor: "#121212",
   });
 
   return (

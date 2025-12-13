@@ -9,6 +9,7 @@ import { CacheKeys, getKeyForListRange } from "./CacheKeys";
 import { SDKListRange, SDKRequest } from "./SDKTypes";
 import { AccessTokenResponse } from "./types/AccessTokenResponse";
 import { List } from "./types/List";
+import { CurrentlyPlayingTrackResponse } from "./types/player/CurrentlyPlayingTrackResponse";
 import { PlayList } from "./types/Playlist";
 import { TopItemResponse } from "./types/top-items/TopItemResponse";
 import { UsersTopItemRequest } from "./types/top-items/UsersTopItemRequest";
@@ -268,6 +269,34 @@ class SpotifySDK {
 
     const token = await this.refreshAndGetToken();
     const response = await axios.get<List<PlayList>>(url.href, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 200) {
+      apiCache.set(cacheKey, response.data);
+      return response.data;
+    } else {
+      throw response.statusText;
+    }
+  }
+
+  async getCurrentlyPlayingTrack() {
+    const cacheKey = CacheKeys.CurrentlyPlaying;
+    const cache = await apiCache.get<CurrentlyPlayingTrackResponse>(cacheKey);
+
+    // NOTE : For Development purpose return from cache
+    if (cache) {
+      return cache;
+    }
+
+    const url = new URL(
+      `https://api.spotify.com/v1/me/player/currently-playing`
+    );
+
+    const token = await this.refreshAndGetToken();
+    const response = await axios.get<CurrentlyPlayingTrackResponse>(url.href, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

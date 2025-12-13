@@ -1,30 +1,43 @@
+import ImageBackgroundView from "@components/ImageBackgroundView";
+import { selectCurrentlyPlaying } from "@data/state/player/PlayerSelectors";
+import { useAppSelector } from "@hooks/useStore";
 import { Image } from "expo-image";
 import React from "react";
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
-import Animated, { AnimatedStyle } from "react-native-reanimated";
+import { AnimatedStyle } from "react-native-reanimated";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 import PlayButton from "../Player/PlayButton";
 
 export default function MiniPlayingBar({
   style,
 }: {
-  style?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
+  style?: StyleProp<AnimatedStyle<ViewStyle>>;
 }) {
   const insets = useSafeAreaInsets();
   const styles = createStyles(insets);
 
+  const { title, author, isPlaying, image } = useAppSelector(
+    selectCurrentlyPlaying
+  );
+
   return (
-    <Animated.View style={[styles.container, style]}>
+    <ImageBackgroundView
+      style={[styles.container, style]}
+      imageUri={image?.url}
+    >
       <View style={styles.songDetailContainer}>
         <Image
           source={
+            image?.url ??
             "https://i.scdn.co/image/ab67616d0000b2737e7f1d0bdb2bb5a2afc4fb25"
           }
           style={styles.coverImage}
         />
         <View style={styles.labelContainer}>
-          <Text style={styles.songLabel}>Wake Me Up(feat.Justice)</Text>
-          <Text style={styles.artists}>The Weekend,Justice</Text>
+          <Text style={styles.songLabel}>
+            {title ?? "Wake Me Up(feat.Justice)"}
+          </Text>
+          <Text style={styles.artists}>{author ?? "The Weekend, Justice"}</Text>
         </View>
       </View>
       <View style={styles.controlContainer}>
@@ -32,9 +45,13 @@ export default function MiniPlayingBar({
           source={require("../../assets/svgs/devices.svg")}
           style={styles.controlIcon}
         />
-        <PlayButton mode="small" imageStyle={styles.controlIcon} />
+        <PlayButton
+          isPlaying={isPlaying}
+          mode="small"
+          imageStyle={styles.controlIcon}
+        />
       </View>
-    </Animated.View>
+    </ImageBackgroundView>
   );
 }
 
@@ -47,7 +64,7 @@ const createStyles = (insets: EdgeInsets) => {
       justifyContent: "space-between",
       borderRadius: 10,
       gap: 8,
-      backgroundColor: "#1D0D02",
+      backgroundColor: "transparent",
       padding: 8,
     },
     songDetailContainer: {

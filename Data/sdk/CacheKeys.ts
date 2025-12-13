@@ -8,6 +8,7 @@ export enum CacheKeys {
   AuthData = "auth_data",
   TopItems = "top_items",
   UserPlaylists = "user_playlists",
+  CurrentlyPlaying = "currently_playing",
 }
 
 export function getKeyForListRange(key: string, range: SDKListRange) {
