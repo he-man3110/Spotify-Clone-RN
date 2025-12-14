@@ -1,3 +1,5 @@
+import { ColorValue } from "react-native";
+
 export type ContentStatus =
   | "unavailable"
   | "loading"
@@ -21,3 +23,9 @@ export namespace ContentStatus {
   export const isNotAvailable = (status: ContentStatus) =>
     status === "unavailable" || status === "error";
 }
+
+export type ImageColorAnalysisResult = {
+  primary: ColorValue;
+  secondary: ColorValue;
+  background: ColorValue;
+};

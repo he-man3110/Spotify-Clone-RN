@@ -43,12 +43,12 @@ const getImageSource = (mode: PlayButtonSize, isPlaying: boolean) => {
   switch (mode) {
     case "small":
       return isPlaying
-        ? require("../../assets/svgs/pause_spotify.svg")
-        : require("../../assets/svgs/play_spotify.svg");
+        ? require("@assets/svgs/pause_spotify.svg")
+        : require("@assets/svgs/play_spotify.svg");
     case "large":
       return isPlaying
-        ? require("../../assets/svgs/pause_in_circle.svg")
-        : require("../../assets/svgs/play_in_circle.svg");
+        ? require("@assets/svgs/pause_in_circle.svg")
+        : require("@assets/svgs/play_in_circle.svg");
   }
 };
 

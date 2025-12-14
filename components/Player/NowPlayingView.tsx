@@ -1,4 +1,5 @@
 import { selectCurrentlyPlaying } from "@data/state/player/PlayerSelectors";
+import useAlbumAestheticColors from "@hooks/useAlbumAestheticColors.hook";
 import { useAppSelector } from "@hooks/useStore";
 import { Image } from "expo-image";
 import React from "react";
@@ -16,11 +17,12 @@ function NowPlayingView({
   playlist?: string;
   style?: StyleProp<AnimatedStyle<ViewStyle>>;
 }) {
-  const { title, author, isPlaying, image, progressMs, totalMs } =
+  const { trackId, title, author, isPlaying, image, progressMs, totalMs } =
     useAppSelector(selectCurrentlyPlaying);
+  const { backgroundStyle, background } = useAlbumAestheticColors({ trackId });
 
   return (
-    <Animated.View style={[{ flex: 1 }, style]}>
+    <Animated.View style={[{ flex: 1 }, style, backgroundStyle]}>
       <HeaderView playlist={playlist} />
       <Animated.View
         style={{
@@ -42,7 +44,7 @@ function NowPlayingView({
         />
       </Animated.View>
       <Animated.View style={{ height: 64 }} />
-      <MusicDetail song={title} artist={author} />
+      <MusicDetail song={title} artist={author} fadeColor={background} />
       <Animated.View style={{ paddingHorizontal: 16, gap: 16 }}>
         <MusicControls
           isPlaying={isPlaying}

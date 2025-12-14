@@ -287,9 +287,9 @@ class SpotifySDK {
     const cache = await apiCache.get<CurrentlyPlayingTrackResponse>(cacheKey);
 
     // NOTE : For Development purpose return from cache
-    if (cache) {
-      return cache;
-    }
+    // if (cache) {
+    //   return cache;
+    // }
 
     const url = new URL(
       `https://api.spotify.com/v1/me/player/currently-playing`

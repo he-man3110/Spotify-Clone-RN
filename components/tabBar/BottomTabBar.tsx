@@ -1,3 +1,6 @@
+import { selectCurrentlyPlaying } from "@data/state/player/PlayerSelectors";
+import useAlbumAestheticColors from "@hooks/useAlbumAestheticColors.hook";
+import { useAppSelector } from "@hooks/useStore";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { ColorUtils } from "@utils/ColorUtils";
 import { BlurView } from "expo-blur";
@@ -21,6 +24,11 @@ const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 export default function BottomTabBar(props: BottomTabBarProps) {
   const styles = createStyles(props.insets);
 
+  const { trackId } = useAppSelector(selectCurrentlyPlaying);
+  const { background } = useAlbumAestheticColors({
+    trackId,
+  });
+
   const {
     ref,
     panGesture,
@@ -29,11 +37,10 @@ export default function BottomTabBar(props: BottomTabBarProps) {
     mainPlayerStyle,
     miniPlayerStyle,
     bottomTabBarStyle,
-    gradientStyle,
   } = usePlayerPanHandle({
     miniPlayerHeight: MINI_PLAYER_HEIGHT,
     bottomTabBarHeight: BOTTOM_TAB_BAR_HEIGHT,
-    backgroundColor: "#121212",
+    backgroundColor: background,
   });
 
   return (
