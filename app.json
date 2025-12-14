@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "spotify-clone",
+    "name": "Spotify",
     "slug": "spotify-clone",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,7 +10,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.spotify-clone",
-      "icon": "./assets/images/icon.png"
+      "icon": "./assets/images/spotify-clone.icon"
     },
     "android": {
       "adaptiveIcon": {

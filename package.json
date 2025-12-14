@@ -6,7 +6,7 @@
     "start:tunnel": "expo start --tunnel",
     "start:clean": "expo start -c",
     "start": "expo start",
-    "prebuild": "npx expo prebuild",
+    "prebuild": "npx expo prebuild --clean",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",

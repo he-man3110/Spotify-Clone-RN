@@ -42,8 +42,8 @@ app-example
 yarn.lock
 
 ios/
-*.json
 
+settings.json
 app.*.json
 
 /package-lock.json
