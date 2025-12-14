@@ -2,137 +2,119 @@ import { ColorUtils, HexColorValue } from "@utils/ColorUtils";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { PropsWithChildren, useEffect } from "react";
 import {
+  ColorValue,
   LayoutChangeEvent,
-  NativeSyntheticEvent,
   ScrollView,
   StyleProp,
-  TextLayoutEventData,
+  StyleSheet,
+  TextLayoutEvent,
   TextStyle,
   ViewStyle,
 } from "react-native";
 import Animated, {
   AnimatedStyle,
+  cancelAnimation,
   Easing,
-  runOnJS,
-  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
   withTiming,
 } from "react-native-reanimated";
 
 const FADE_AREA_WIDTH = 16;
+const SCROLL_PAUSE_DURATION = 2000;
+
+export type TimeInMs = number;
+
+export type AutoScrollingTextProps = PropsWithChildren<{
+  style: StyleProp<AnimatedStyle<TextStyle>>;
+  fadeColor?: HexColorValue | ColorValue;
+  fadeAreaWidth?: number;
+  pauseDuration?: TimeInMs;
+  contentContainerStyle?: StyleProp<AnimatedStyle<ViewStyle>>;
+}>;
 
 function AutoScrollingText({
   children,
   style,
-  color,
-  contentContainerStyle,
-}: PropsWithChildren<{
-  style: StyleProp<AnimatedStyle<TextStyle>>;
-  color?: HexColorValue;
-  contentContainerStyle?: StyleProp<AnimatedStyle<ViewStyle>>;
-}>) {
+  fadeAreaWidth = FADE_AREA_WIDTH,
+  pauseDuration = SCROLL_PAUSE_DURATION,
+  fadeColor: color,
+}: AutoScrollingTextProps) {
   const availableWidth = useSharedValue(0);
   const textContentSize = useSharedValue(0);
-  const movingForward = useSharedValue(1);
-  const translateX = useSharedValue(FADE_AREA_WIDTH);
+  const translateX = useSharedValue(0);
+
+  const styles = createAutoScrollingTextStyles(fadeAreaWidth);
 
   const onContainerLayout = (event: LayoutChangeEvent) => {
     availableWidth.value = event.nativeEvent.layout.width;
   };
 
-  const onTextLayout = (event: NativeSyntheticEvent<TextLayoutEventData>) => {
-    textContentSize.value = event.nativeEvent.lines.at(0)!.width;
-  };
-
-  const flipDirection = () => {
-    setTimeout(() => {
-      movingForward.value = 1 - movingForward.value;
-    }, 2_000);
-  };
-
-  const textStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateX: translateX.value,
-        },
-      ],
-    };
-  }, [translateX.value]);
-
-  useAnimatedReaction(
-    () => movingForward.value,
-    () => {
-      if (textContentSize.value > availableWidth.value) {
-        translateX.value = withTiming(
-          movingForward.value === 1
-            ? FADE_AREA_WIDTH
-            : availableWidth.value - textContentSize.value - FADE_AREA_WIDTH,
-          {
-            duration:
-              (Math.abs(
-                availableWidth.value - textContentSize.value - FADE_AREA_WIDTH
-              ) /
-                30) *
-              1_000,
-            easing: Easing.linear,
-          },
-          (finished) => {
-            if (finished) {
-              runOnJS(flipDirection)();
-            }
-          }
-        );
-      }
+  const onTextLayout = (event: TextLayoutEvent) => {
+    const line = event.nativeEvent.lines.at(0);
+    if (line) {
+      textContentSize.value = line.width;
+      startAnimation();
     }
-  );
+  };
+
+  const startAnimation = () => {
+    if (textContentSize.value > availableWidth.value) {
+      const scrollValue =
+        availableWidth.value - (textContentSize.value + 2 * FADE_AREA_WIDTH);
+      const duration = (scrollValue / 30) * 1000;
+      const timing = {
+        easing: Easing.inOut(Easing.quad),
+        duration: 3000,
+      };
+      translateX.value = withRepeat(
+        withSequence(
+          withDelay(pauseDuration, withTiming(scrollValue, timing)),
+          withDelay(pauseDuration, withTiming(0, timing))
+        ),
+        -1,
+        false
+      );
+    }
+  };
 
   useEffect(() => {
-    flipDirection();
-  }, []);
+    // Reset to the beginning.
+    translateX.value = withTiming(0, { duration: 300 });
+
+    // Start the animation after 500ms, to let the reset action complete.
+    setTimeout(startAnimation, 500);
+
+    return () => {
+      cancelAnimation(translateX);
+    };
+  }, [children]);
+
+  const textStyle = useAnimatedStyle(() => {
+    return { transform: [{ translateX: translateX.value }] };
+  }, [translateX.value]);
 
   return (
-    <Animated.View onLayout={onContainerLayout} style={[contentContainerStyle]}>
-      {color && (
-        <FadingView
-          colors={[
-            color,
-            ColorUtils.withAlpha(color, 0.5),
-            ColorUtils.withAlpha(color, 0),
-          ]}
-          style={{
-            width: FADE_AREA_WIDTH,
-            height: "100%",
-            zIndex: 1,
-            position: "absolute",
-            left: 0,
-          }}
-        />
-      )}
-      {color && (
-        <FadingView
-          colors={[
-            ColorUtils.withAlpha(color, 0),
-            ColorUtils.withAlpha(color, 0.5),
-            color,
-          ]}
-          style={{
-            width: FADE_AREA_WIDTH,
-            height: "100%",
-            zIndex: 1,
-            position: "absolute",
-            right: 0,
-          }}
-        />
-      )}
+    <Animated.View onLayout={onContainerLayout} style={[styles.container]}>
+      <FadingView
+        color={color?.toString() as HexColorValue}
+        style={styles.fadeStart}
+      />
+      <FadingView
+        color={color?.toString() as HexColorValue}
+        invert
+        style={styles.fadeEnd}
+      />
       <ScrollView
         scrollEnabled={false}
         horizontal
         showsHorizontalScrollIndicator={false}
       >
         <Animated.Text
-          style={[style, textStyle]}
+          style={[style, textStyle, { paddingHorizontal: fadeAreaWidth }]}
           onTextLayout={onTextLayout}
           numberOfLines={1}
         >
@@ -143,14 +125,45 @@ function AutoScrollingText({
   );
 }
 
+export const createAutoScrollingTextStyles = (fadeAreaWidth: number) => {
+  return StyleSheet.create({
+    container: {},
+    fadeStart: {
+      width: fadeAreaWidth,
+      height: "100%",
+      zIndex: 1,
+      position: "absolute",
+      left: 0,
+    },
+    fadeEnd: {
+      width: fadeAreaWidth,
+      height: "100%",
+      zIndex: 1,
+      position: "absolute",
+      right: 0,
+    },
+  });
+};
+
 export const FadingView = ({
   style,
-  colors,
+  color = "#121212",
+  invert = false,
 }: {
   invert?: boolean;
   style?: StyleProp<ViewStyle>;
-  colors: [string, string, ...string[]];
+  color?: HexColorValue;
 }) => {
+  const colors: [ColorValue, ColorValue, ...ColorValue[]] = [
+    color,
+    ColorUtils.withAlpha(color, 0.5),
+    ColorUtils.withAlpha(color, 0),
+  ];
+
+  if (invert) {
+    colors.reverse();
+  }
+
   return (
     <LinearGradient
       colors={colors}

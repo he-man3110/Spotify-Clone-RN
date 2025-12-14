@@ -6,7 +6,8 @@
     "start:tunnel": "expo start --tunnel",
     "start:clean": "expo start -c",
     "start": "expo start",
-    "prebuild": "npx expo prebuild --clean",
+    "prebuild": "npx expo prebuild",
+    "prebuild:clean": "npx expo prebuild --clean",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -20,7 +21,7 @@
     "format:staged": "prettier --write",
     "open:xcode": "cd ios && xed spotifyclone.xcworkspace && cd ..",
     "clean:cache:ios": "rm -rf ~/Library/Developer/Xcode/DerivedData",
-    "dev:build:ios": "npx expo prebuild --clean && npx expo run:ios --no-build-cache",
+    "dev:build:ios": "npx expo run:ios --no-build-cache",
     "build": "tsc --noEmit && expo export"
   },
   "jest": {
