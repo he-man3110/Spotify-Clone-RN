@@ -1,8 +1,8 @@
-import Categories, { Category } from "@/components/Search/Categories";
-import DiscoverList from "@/components/Search/DiscoverList";
-import SearchBar from "@/components/Search/SearchBar";
-import SearchHeader from "@/components/Search/SearchHeader";
-import allCategories from "@/Data/Browse/BrowseCategories.json";
+import Categories, { Category } from "@components/Search/Categories";
+import DiscoverList from "@components/Search/DiscoverList";
+import SearchBar from "@components/Search/SearchBar";
+import SearchHeader from "@components/Search/SearchHeader";
+import allCategories from "@data/Browse/BrowseCategories.json";
 import { FlashList, ListRenderItemInfo } from "@shopify/flash-list";
 import React, { useCallback, useMemo } from "react";
 import { StyleSheet, Text } from "react-native";

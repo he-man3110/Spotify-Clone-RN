@@ -1,19 +1,20 @@
+import { Log as Logger } from "@utils/log/Log";
 import axios from "axios";
 import { Buffer } from "buffer";
 import * as Crypto from "expo-crypto";
 import AppCredentials from "../../app.credentials.json";
 import { apiCache } from "../storage/SDKCacheManager";
-import { CacheKeys, getKeyForListRange } from "./CacheKeys";
-import { UsersTopItemRequest } from "./types/request/UsersTopItemRequest";
-import { AccessTokenResponse } from "./types/AccessTokenResponse";
-import { TopItemResponse } from "./types/TopItemResponse";
-import { UserProfile } from "./types/UserProfileResponse";
 import { CacheExpiry } from "./CacheExpiry";
-import { Log as Logger } from "@utils/log/Log";
+import { CacheKeys, getKeyForListRange } from "./CacheKeys";
 import { SDKListRange, SDKRequest } from "./SDKTypes";
-import { addListRangeParams } from "./utils/GeneralUtils";
-import { PlayList } from "./types/Playlist";
+import { AccessTokenResponse } from "./types/AccessTokenResponse";
 import { List } from "./types/List";
+import { CurrentlyPlayingTrackResponse } from "./types/player/CurrentlyPlayingTrackResponse";
+import { PlayList } from "./types/Playlist";
+import { TopItemResponse } from "./types/top-items/TopItemResponse";
+import { UsersTopItemRequest } from "./types/top-items/UsersTopItemRequest";
+import { UserProfile } from "./types/UserProfileResponse";
+import { addListRangeParams } from "./utils/GeneralUtils";
 
 export type AuthorizationCode = string;
 
@@ -207,10 +208,7 @@ class SpotifySDK {
     });
 
     if (response.status === 200) {
-      apiCache.set(CacheKeys.UserProfile, {
-        value: response.data,
-        expiresAt: 0,
-      });
+      apiCache.set(CacheKeys.UserProfile, response.data, CacheExpiry.ONE_MONTH);
       return response.data;
     } else {
       throw response.statusText;
@@ -271,6 +269,34 @@ class SpotifySDK {
 
     const token = await this.refreshAndGetToken();
     const response = await axios.get<List<PlayList>>(url.href, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 200) {
+      apiCache.set(cacheKey, response.data);
+      return response.data;
+    } else {
+      throw response.statusText;
+    }
+  }
+
+  async getCurrentlyPlayingTrack() {
+    const cacheKey = CacheKeys.CurrentlyPlaying;
+    const cache = await apiCache.get<CurrentlyPlayingTrackResponse>(cacheKey);
+
+    // NOTE : For Development purpose return from cache
+    // if (cache) {
+    //   return cache;
+    // }
+
+    const url = new URL(
+      `https://api.spotify.com/v1/me/player/currently-playing`
+    );
+
+    const token = await this.refreshAndGetToken();
+    const response = await axios.get<CurrentlyPlayingTrackResponse>(url.href, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -1,6 +1,17 @@
+import AutoScrollingText from "@components/AutoScrollingText";
+import AlbumArtView from "@components/Player/AlbumArtView";
+import { selectCurrentlyPlaying } from "@data/state/player/PlayerSelectors";
+import useAlbumAestheticColors from "@hooks/useAlbumAestheticColors.hook";
+import { useAppSelector } from "@hooks/useStore";
 import { Image } from "expo-image";
 import React from "react";
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
+import {
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from "react-native";
 import Animated, { AnimatedStyle } from "react-native-reanimated";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 import PlayButton from "../Player/PlayButton";
@@ -8,31 +19,53 @@ import PlayButton from "../Player/PlayButton";
 export default function MiniPlayingBar({
   style,
 }: {
-  style?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
+  style?: StyleProp<AnimatedStyle<ViewStyle>>;
 }) {
   const insets = useSafeAreaInsets();
   const styles = createStyles(insets);
 
+  const { trackId, title, author, isPlaying, image } = useAppSelector(
+    selectCurrentlyPlaying
+  );
+  const { backgroundStyle, background } = useAlbumAestheticColors({ trackId });
+
   return (
-    <Animated.View style={[styles.container, style]}>
+    <Animated.View style={[styles.container, backgroundStyle, style]}>
       <View style={styles.songDetailContainer}>
-        <Image
-          source={
-            "https://i.scdn.co/image/ab67616d0000b2737e7f1d0bdb2bb5a2afc4fb25"
-          }
-          style={styles.coverImage}
-        />
+        <AlbumArtView imageUrl={image?.url} style={styles.coverImage} />
         <View style={styles.labelContainer}>
-          <Text style={styles.songLabel}>Wake Me Up(feat.Justice)</Text>
-          <Text style={styles.artists}>The Weekend,Justice</Text>
+          <AutoScrollingText
+            fadeColor={background.toString()}
+            fadeAreaWidth={0}
+            style={styles.songLabel}
+          >
+            {title ?? "Wake Me Up(feat.Justice)"}
+          </AutoScrollingText>
+          <AutoScrollingText
+            fadeAreaWidth={0}
+            fadeColor={background.toString()}
+            style={styles.artists}
+          >
+            {author ?? "The Weekend, Justice"}
+          </AutoScrollingText>
         </View>
       </View>
       <View style={styles.controlContainer}>
-        <Image
-          source={require("../../assets/svgs/devices.svg")}
-          style={styles.controlIcon}
+        <Pressable style={{ paddingHorizontal: 4, padding: 8 }}>
+          <Image
+            source={require("@assets/svgs/devices.svg")}
+            style={styles.controlIcon}
+          />
+        </Pressable>
+        <PlayButton
+          isPlaying={isPlaying}
+          mode="small"
+          style={{
+            padding: 8,
+            paddingHorizontal: 4,
+          }}
+          imageStyle={styles.controlIcon}
         />
-        <PlayButton mode="small" imageStyle={styles.controlIcon} />
       </View>
     </Animated.View>
   );
@@ -45,12 +78,13 @@ const createStyles = (insets: EdgeInsets) => {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
+      backgroundColor: "transparent",
       borderRadius: 10,
       gap: 8,
-      backgroundColor: "#1D0D02",
       padding: 8,
     },
     songDetailContainer: {
+      flex: 1,
       flexDirection: "row",
       alignItems: "center",
       gap: 8,
@@ -61,6 +95,7 @@ const createStyles = (insets: EdgeInsets) => {
       borderRadius: 4,
     },
     labelContainer: {
+      flex: 1,
       rowGap: 2,
     },
     songLabel: {
@@ -75,12 +110,11 @@ const createStyles = (insets: EdgeInsets) => {
     controlContainer: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 24,
-      paddingRight: 8,
+      gap: 8,
     },
     controlIcon: {
       width: 28,
-      height: 20,
+      height: 22,
       resizeMode: "contain",
       tintColor: "white",
     },

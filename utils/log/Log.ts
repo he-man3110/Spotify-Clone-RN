@@ -24,16 +24,16 @@ interface LogColors {
 
 class Logger {
   private currentLevel: LogLevel = __DEV__ ? LogLevel.VERBOSE : LogLevel.INFO;
-  
+
   private colors: LogColors = {
-    reset: '\x1b[0m',
-    verbose: '\x1b[37m',    // White
-    debug: '\x1b[36m',      // Cyan
-    info: '\x1b[37m',       // White
-    warn: '\x1b[33m',       // Yellow
-    error: '\x1b[31m',      // Red
-    tag: '\x1b[35m',        // Magenta
-    timestamp: '\x1b[90m',  // Gray
+    reset: "\x1b[0m",
+    verbose: "\x1b[37m", // White
+    debug: "\x1b[36m", // Cyan
+    info: "\x1b[37m", // White
+    warn: "\x1b[33m", // Yellow
+    error: "\x1b[31m", // Red
+    tag: "\x1b[35m", // Magenta
+    timestamp: "\x1b[90m", // Gray
   };
 
   private formatTimestamp(): string {
@@ -46,11 +46,11 @@ class Logger {
     message: string | (() => string)
   ): string {
     // Lazy evaluation: only compute message if needed
-    const actualMessage = typeof message === 'function' ? message() : message;
-    
+    const actualMessage = typeof message === "function" ? message() : message;
+
     const timestamp = this.formatTimestamp();
     const levelStr = level.toUpperCase().padEnd(7);
-    
+
     return (
       `${this.colors.timestamp}${timestamp}${this.colors.reset} ` +
       `${this.colors[level]}${levelStr}${this.colors.reset} ` +
@@ -67,7 +67,7 @@ class Logger {
   ): void {
     // Early return if log level is not active (most efficient check)
     if (level < this.currentLevel) return;
-    
+
     // Only format and output if level is active
     console.log(this.formatMessage(colorKey, tag, message));
   }
@@ -97,35 +97,35 @@ class Logger {
    * Verbose logging - most detailed
    */
   v(tag: string, message: string | (() => string)): void {
-    this.log(LogLevel.VERBOSE, 'verbose', tag, message);
+    this.log(LogLevel.VERBOSE, "verbose", tag, message);
   }
 
   /**
    * Debug logging - development info
    */
   d(tag: string, message: string | (() => string)): void {
-    this.log(LogLevel.DEBUG, 'debug', tag, message);
+    this.log(LogLevel.DEBUG, "debug", tag, message);
   }
 
   /**
    * Info logging - general information
    */
   i(tag: string, message: string | (() => string)): void {
-    this.log(LogLevel.INFO, 'info', tag, message);
+    this.log(LogLevel.INFO, "info", tag, message);
   }
 
   /**
    * Warning logging - potential issues
    */
   w(tag: string, message: string | (() => string)): void {
-    this.log(LogLevel.WARN, 'warn', tag, message);
+    this.log(LogLevel.WARN, "warn", tag, message);
   }
 
   /**
    * Error logging - serious problems
    */
   e(tag: string, message: string | (() => string)): void {
-    this.log(LogLevel.ERROR, 'error', tag, message);
+    this.log(LogLevel.ERROR, "error", tag, message);
   }
 
   /**
@@ -151,7 +151,7 @@ class Logger {
 
     const start = performance.now();
     this.d(tag, `⏱️  Starting: ${label}`);
-    
+
     return () => {
       const duration = performance.now() - start;
       this.d(tag, `⏱️  Finished: ${label} (${duration.toFixed(2)}ms)`);
@@ -167,11 +167,13 @@ class Logger {
     }
 
     if (collapsed) {
-      console.groupCollapsed(`${this.colors.tag}[${tag}] ${title}${this.colors.reset}`);
+      console.groupCollapsed(
+        `${this.colors.tag}[${tag}] ${title}${this.colors.reset}`
+      );
     } else {
       console.group(`${this.colors.tag}[${tag}] ${title}${this.colors.reset}`);
     }
-    
+
     return () => console.groupEnd();
   }
 }
@@ -185,7 +187,7 @@ export default Log;
 
 // Example usage:
 /*
-import Log, { LogLevel } from '@/utils/log/Log';
+import Log, { LogLevel } from '@utils/log/Log';
 
 // Set log level
 Log.setLevel(LogLevel.INFO);

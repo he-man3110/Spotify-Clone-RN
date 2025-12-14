@@ -1,4 +1,4 @@
-import { useAppSelector } from "@/hooks/useStore";
+import { useAppSelector } from "@hooks/useStore";
 import { Stack } from "expo-router";
 
 export default function _layout() {

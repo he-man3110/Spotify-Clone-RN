@@ -1,5 +1,5 @@
-import { ColorUtils, HexColorValue } from "@/utils/ColorUtils";
-import { useWindowDimensions } from "react-native";
+import { ColorUtils } from "@utils/ColorUtils";
+import { ColorValue, useWindowDimensions } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import Animated, {
   interpolate,
@@ -15,7 +15,7 @@ export const usePlayerPanHandle = ({
   bottomTabBarHeight,
   backgroundColor,
 }: {
-  backgroundColor: HexColorValue;
+  backgroundColor: ColorValue;
   miniPlayerHeight: number;
   bottomTabBarHeight: number;
 }) => {

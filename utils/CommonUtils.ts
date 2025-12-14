@@ -1,4 +1,4 @@
-import { ContentStatus } from "@Data/state/common/CommonTypes";
+import { ContentStatus } from "@data/state/common/CommonTypes";
 
 export const isLoading = (status: ContentStatus) => status === "loading";
 export const isRefreshing = (status: ContentStatus) => status === "refreshing";

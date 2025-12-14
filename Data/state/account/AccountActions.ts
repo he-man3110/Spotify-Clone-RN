@@ -1,6 +1,6 @@
-import SpotSdk from "@/Data/sdk/DataSource";
-import { createAppAsyncThunk } from "../withTypes";
+import SpotSdk from "@data/sdk/DataSource";
 import Logger from "@utils/log/Log";
+import { createAppAsyncThunk } from "../withTypes";
 
 const Log = Logger.createTaggedLogger("AccountActions");
 
@@ -17,9 +17,12 @@ export const login = createAppAsyncThunk(
 
 export const loadAuthenticationStatus = createAppAsyncThunk(
   "AccountSlice/loadAuthenticationStatus",
-  async () => {
+  async (_, thunkAPI) => {
     try {
       const isAuthenticated = await SpotSdk.isUserAuthenticated();
+      if (isAuthenticated) {
+        await thunkAPI.dispatch(loadUserProfile()).unwrap();
+      }
       Log.d(`Authentication Check : ${isAuthenticated}`);
       return isAuthenticated;
     } catch (error) {
@@ -32,7 +35,7 @@ export const loadUserProfile = createAppAsyncThunk(
   "AccountSlice/loadUserProfile",
   async () => {
     try {
-      const response = await SpotSdk.getUserProfile();
+      const response = await SpotSdk.getUserProfile({ refreshCache: true });
       return response;
     } catch (error) {
       throw error;

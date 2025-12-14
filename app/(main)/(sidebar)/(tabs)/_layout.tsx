@@ -1,5 +1,5 @@
-import BottomTabBar from "@/components/tabBar/BottomTabBar";
-import TabBarItem from "@/components/tabBar/TabBarItem";
+import BottomTabBar from "@components/tabBar/BottomTabBar";
+import TabBarItem from "@components/tabBar/TabBarItem";
 import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
 import { StyleSheet } from "react-native";
@@ -14,7 +14,7 @@ export default function TabLayout() {
       tabBar={(props) => {
         return <BottomTabBar {...props} />;
       }}
-      initialRouteName="search"
+      initialRouteName="index"
       screenOptions={{
         headerShown: false,
         tabBarActiveBackgroundColor: "red",
@@ -39,8 +39,8 @@ export default function TabLayout() {
               label="Home"
               source={
                 focused
-                  ? require("@/assets/svgs/home_filled.svg")
-                  : require("@/assets/svgs/home.svg")
+                  ? require("@assets/svgs/home_filled.svg")
+                  : require("@assets/svgs/home.svg")
               }
               isFocused={focused}
             />
@@ -65,8 +65,8 @@ export default function TabLayout() {
               label="Search"
               source={
                 focused
-                  ? require("@/assets/svgs/search_filled.svg")
-                  : require("@/assets/svgs/search.svg")
+                  ? require("@assets/svgs/search_filled.svg")
+                  : require("@assets/svgs/search.svg")
               }
               isFocused={focused}
             />
@@ -82,8 +82,8 @@ export default function TabLayout() {
               label="Your Library"
               source={
                 focused
-                  ? require("@/assets/svgs/library_filled.svg")
-                  : require("@/assets/svgs/library.svg")
+                  ? require("@assets/svgs/library_filled.svg")
+                  : require("@assets/svgs/library.svg")
               }
               isFocused={focused}
             />

@@ -39,10 +39,11 @@ app-example
 
 .lh
 ./*lock.json
+yarn.lock
 
 ios/
-*.json
 
+settings.json
 app.*.json
 
 /package-lock.json

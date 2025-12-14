@@ -11,7 +11,11 @@ export default function PlayerPanel() {
   const styles = createPlayerPanelStyles();
 
   const { ref, panGesture, containerStyle, mainPlayerStyle, miniPlayerStyle } =
-    usePlayerPanHandle({});
+    usePlayerPanHandle({
+      backgroundColor: "#000000",
+      miniPlayerHeight: 0,
+      bottomTabBarHeight: 0,
+    });
 
   return (
     <GestureDetector gesture={panGesture}>

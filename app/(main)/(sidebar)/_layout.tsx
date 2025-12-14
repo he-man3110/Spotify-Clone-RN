@@ -1,5 +1,5 @@
-import { CustomDrawerContent } from "@/components/layout/CustomDrawerView";
-import { useAppSelector } from "@/hooks/useStore";
+import { CustomDrawerContent } from "@components/layout/CustomDrawerView";
+import { useAppSelector } from "@hooks/useStore";
 import { Drawer } from "expo-router/drawer";
 
 export default function _layout() {
