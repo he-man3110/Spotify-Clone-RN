@@ -3,7 +3,10 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start --tunnel",
+    "start:tunnel": "expo start --tunnel",
+    "start:clean": "expo start -c",
+    "start": "expo start",
+    "prebuild": "npx expo prebuild",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -16,6 +19,8 @@
     "format:check": "prettier --check .",
     "format:staged": "prettier --write",
     "open:xcode": "cd ios && xed spotifyclone.xcworkspace && cd ..",
+    "clean:cache:ios": "rm -rf ~/Library/Developer/Xcode/DerivedData",
+    "dev:build:ios": "npx expo prebuild --clean && npx expo run:ios --no-build-cache",
     "build": "tsc --noEmit && expo export"
   },
   "jest": {
