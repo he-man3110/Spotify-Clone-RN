@@ -1,15 +1,27 @@
+import { timeInSec } from "@data/sdk/utils/GeneralUtils";
+import { setSeekerPosition } from "@data/state/player/PlayerActions";
+import { selectCurrentTrackProgress } from "@data/state/player/PlayerSelectors";
+import { AppDispatch } from "@data/state/store";
+import { useAppDispatch, useAppSelector } from "@hooks/useStore";
+import Log from "@utils/log/Log";
+import debounce from "lodash/debounce";
 import React, { useEffect, useRef } from "react";
-import { LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
+import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+  cancelAnimation,
   clamp,
+  Easing,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import PressableIcon from "../base/PressableIcon";
 import PlayButton from "./PlayButton";
+import ProgressTime from "./ProgressTime";
 import RandomizeButton from "./RandomizeButton";
 import RepeatButton from "./RepeatButton";
 
@@ -22,64 +34,82 @@ export type MusicControlsProps = {
   totalMs?: number;
 };
 
-function MusicControls({
-  isPlaying,
-  currentMs = 0,
-  totalMs = 1,
-}: MusicControlsProps) {
+function MusicControls({ isPlaying }: MusicControlsProps) {
   const styles = createMusicControlStyles();
-  const timeoutTask = useRef<number>(null);
 
   const seekerX = useSharedValue(-SEEKER_PADDING);
+  const sX = useRef(0);
   const prvX = useSharedValue(0);
   const seekerScale = useSharedValue(1);
-
   const width = useSharedValue<number>(0);
-  const progressBarWidth = useDerivedValue(() => {
-    return seekerX.value + SEEKER_PADDING + HANDLE_SIZE / 2;
-  });
 
-  const progressMs = useSharedValue(currentMs);
-
-  useEffect(() => {
-    timeoutTask.current = setInterval(() => {
-      progressMs.value += 1_000;
-
-      let progress;
-      if (!currentMs || !totalMs || totalMs === 0) progress = 0;
-      else progress = Math.min(1, Math.max(0, progressMs.value / totalMs));
-
-      const progressWidth = width.value * progress;
-      seekerX.value = progressWidth - 2 * SEEKER_PADDING - HANDLE_SIZE;
-    }, 1_000);
-
-    return () => {
-      if (timeoutTask.current) {
-        clearInterval(timeoutTask.current);
-      }
-    };
-  }, [currentMs]);
+  const dispatch = useAppDispatch();
+  const { currentMs, totalMs } = useAppSelector(selectCurrentTrackProgress);
 
   const panGesture = Gesture.Pan()
     .minDistance(1)
     .onTouchesDown(() => {
       seekerScale.value = 1.2;
+      cancelAnimation(seekerX);
     })
     .onUpdate((e) => {
       const posX = prvX.value + e.translationX;
-      seekerX.value = clamp(
-        posX,
-        -SEEKER_PADDING,
-        width.value - HANDLE_SIZE - SEEKER_PADDING
-      );
+      const value = clamp(posX, -SEEKER_PADDING, width.value - SEEKER_PADDING);
+      sX.current = value;
+      seekerX.value = value;
     })
     .onEnd((e) => {
       prvX.value = seekerX.value;
     })
     .onTouchesUp((e) => {
       seekerScale.value = 1;
+
+      if (width.value > 0) {
+        scheduleOnRN(
+          debouncedUpdateProgress,
+          width.value,
+          sX.current,
+          totalMs,
+          dispatch
+        );
+      }
     });
 
+  const startAutoSeek = (currentMs: number) => {
+    const pp = currentMs / totalMs;
+    const currX = width.value * pp - SEEKER_PADDING;
+
+    seekerX.value = currX;
+    prvX.value = currX;
+    const endX = width.value - SEEKER_PADDING;
+    const duration = totalMs - currentMs;
+
+    seekerX.value = withTiming(endX, {
+      duration: duration,
+      easing: Easing.linear,
+    });
+    prvX.value = withTiming(endX, {
+      duration: duration,
+      easing: Easing.linear,
+    });
+  };
+
+  useEffect(() => {
+    cancelAnimation(seekerX);
+    cancelAnimation(prvX);
+
+    Log.d(
+      "[MC]",
+      `Current Time: ${timeInSec(currentMs)} total: ${timeInSec(totalMs)}`
+    );
+    if (isPlaying) {
+      startAutoSeek(currentMs);
+    }
+  }, [currentMs, totalMs, isPlaying]);
+
+  const progressBarWidth = useDerivedValue(() => {
+    return seekerX.value + SEEKER_PADDING + HANDLE_SIZE / 2;
+  });
   const seekerStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -88,7 +118,6 @@ function MusicControls({
       ],
     };
   });
-
   const progressBarStyle = useAnimatedStyle(() => {
     return {
       width: progressBarWidth.value,
@@ -96,7 +125,11 @@ function MusicControls({
   });
 
   const onLayout = (e: LayoutChangeEvent) => {
-    width.value = e.nativeEvent.layout.width;
+    let w = e.nativeEvent.layout.width;
+    if (w > 0 && w > HANDLE_SIZE) {
+      w = w - HANDLE_SIZE;
+    }
+    width.value = w;
   };
 
   const onPrevious = () => {};
@@ -115,8 +148,19 @@ function MusicControls({
         </GestureDetector>
       </Animated.View>
       <View style={styles.timeContainer}>
-        <Text style={styles.time}>0:00</Text>
-        <Text style={styles.time}>-3:33</Text>
+        <ProgressTime
+          style={styles.time}
+          width={width}
+          seekerX={seekerX}
+          totalMs={totalMs}
+        />
+        <ProgressTime
+          reverse
+          style={styles.time}
+          width={width}
+          seekerX={seekerX}
+          totalMs={totalMs}
+        />
       </View>
       <View style={styles.controlsContainer}>
         <RandomizeButton />
@@ -186,5 +230,28 @@ const createMusicControlStyles = () => {
     },
   });
 };
+
+const updateProgress = (
+  width: number,
+  currentX: number,
+  totalDurationInMs: number,
+  dispatch: AppDispatch
+) => {
+  if (width > 0) {
+    // Update the seeker position
+    Log.d(
+      "[MC]",
+      `currentX: ${currentX} width: ${width} totalDurationInMs: ${timeInSec(totalDurationInMs)}`
+    );
+    const pp = currentX / width;
+    const newCms = Math.round(totalDurationInMs * pp);
+
+    // dispatch.
+    Log.d("[MC]", `Updating Progress to ${timeInSec(newCms)}`);
+    dispatch(setSeekerPosition(newCms));
+  }
+};
+
+const debouncedUpdateProgress = debounce(updateProgress, 100);
 
 export default MusicControls;

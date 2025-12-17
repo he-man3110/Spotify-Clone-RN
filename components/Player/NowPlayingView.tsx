@@ -17,8 +17,9 @@ function NowPlayingView({
   playlist?: string;
   style?: StyleProp<AnimatedStyle<ViewStyle>>;
 }) {
-  const { trackId, title, author, isPlaying, image, progressMs, totalMs } =
-    useAppSelector(selectCurrentlyPlaying);
+  const { trackId, title, author, isPlaying, image } = useAppSelector(
+    selectCurrentlyPlaying
+  );
   const { backgroundStyle, background } = useAlbumAestheticColors({ trackId });
 
   return (
@@ -46,26 +47,22 @@ function NowPlayingView({
       <Animated.View style={{ height: 64 }} />
       <MusicDetail song={title} artist={author} fadeColor={background} />
       <Animated.View style={{ paddingHorizontal: 16, gap: 16 }}>
-        <MusicControls
-          isPlaying={isPlaying}
-          currentMs={progressMs}
-          totalMs={totalMs}
-        />
+        <MusicControls isPlaying={isPlaying} />
         <HStack>
           <PressableIcon
             onPress={() => {}}
-            source={require("../../assets/svgs/devices.svg")}
+            source={require("@assets/svgs/devices.svg")}
             imageStyle={{ width: 18, height: 18 }}
           />
           <HStack style={{ gap: 28 }}>
             <PressableIcon
               onPress={() => {}}
-              source={require("../../assets/svgs/share.svg")}
+              source={require("@assets/svgs/share.svg")}
               imageStyle={{ width: 18, height: 18 }}
             />
             <PressableIcon
               onPress={() => {}}
-              source={require("../../assets/svgs/queue.svg")}
+              source={require("@assets/svgs/queue.svg")}
               imageStyle={{ width: 18, height: 18 }}
             />
           </HStack>

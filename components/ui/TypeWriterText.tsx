@@ -1,3 +1,4 @@
+import { wait } from "@data/sdk/utils/GeneralUtils";
 import React, { useEffect, useRef, useState } from "react";
 import Animated, { LinearTransition } from "react-native-reanimated";
 
@@ -61,21 +62,6 @@ export default function TypeWriterText({
       </Animated.Text>
     </Animated.View>
   );
-}
-
-function wait(timeInMS: number, signal?: AbortSignal) {
-  return new Promise<void>((resolve, reject) => {
-    if (signal?.aborted) {
-      resolve();
-    }
-
-    const timeoutTask = setTimeout(() => resolve(), timeInMS);
-
-    signal?.addEventListener("abort", (e) => {
-      clearTimeout(timeoutTask);
-      resolve();
-    });
-  });
 }
 
 const calculatePauseIndexes = (text: string) => {
