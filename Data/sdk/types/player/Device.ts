@@ -1,5 +1,7 @@
+export type DeviceId = string;
+
 export interface Device {
-  id: string;
+  id: DeviceId;
   is_active: boolean;
   is_private_session: boolean;
   is_restricted: boolean;

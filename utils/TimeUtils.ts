@@ -8,6 +8,7 @@
  * @returns Formatted time string (e.g., "3:45", "12:34")
  */
 export const formatTime = (ms: number | null | undefined): string => {
+  "worklet";
   if (!ms || ms < 0) return "0:00";
 
   const totalSeconds = Math.floor(ms / 1000);

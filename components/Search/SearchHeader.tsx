@@ -23,7 +23,7 @@ const SearchHeader = ({ style }: { style?: AnimatedStyle<ViewStyle> }) => {
       <HStack style={{ flex: 1 }}>
         <Text style={styles.title}>Search</Text>
         <Image
-          source={require("../../assets/svgs/camera.svg")}
+          source={require("@assets/svgs/camera.svg")}
           style={{ width: 26, height: 36 }}
         />
       </HStack>

@@ -1,6 +1,8 @@
+import { useThemedStyleSheet } from "@hooks/useThemedStyleSheet.hook";
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
+import { Theme } from "../../theme/Theme.interface";
 import { LinkButton } from "../button/LinkButton";
 
 export function CustomDrawerContent() {
@@ -79,7 +81,8 @@ const DrawerItem = ({
   label: string;
   onPress: () => void;
 }) => {
-  const styles = createDrawerItemStyles();
+  const { styles } = useThemedStyleSheet(createDrawerItemStyles);
+
   return (
     <Pressable style={styles.container} onPress={onPress}>
       <Text style={styles.itemText}>{label}</Text>
@@ -87,7 +90,7 @@ const DrawerItem = ({
   );
 };
 
-const createDrawerItemStyles = () => {
+const createDrawerItemStyles = (theme: Theme) => {
   return StyleSheet.create({
     container: {
       flexDirection: "row",
@@ -95,12 +98,10 @@ const createDrawerItemStyles = () => {
       paddingVertical: 12,
       paddingHorizontal: 16,
       borderRadius: 6,
-      //   borderWidth: 1,
-      borderColor: "lime",
     },
     itemText: {
+      ...theme.typography.title.large,
       color: "white",
-      fontSize: 16,
     },
   });
 };

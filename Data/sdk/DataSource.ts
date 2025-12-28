@@ -1,3 +1,4 @@
+import { TimeInMs } from "@components/AutoScrollingText";
 import { Log as Logger } from "@utils/log/Log";
 import axios from "axios";
 import { Buffer } from "buffer";
@@ -10,6 +11,7 @@ import { SDKListRange, SDKRequest } from "./SDKTypes";
 import { AccessTokenResponse } from "./types/AccessTokenResponse";
 import { List } from "./types/List";
 import { CurrentlyPlayingTrackResponse } from "./types/player/CurrentlyPlayingTrackResponse";
+import { DeviceId } from "./types/player/Device";
 import { PlayList } from "./types/Playlist";
 import { TopItemResponse } from "./types/top-items/TopItemResponse";
 import { UsersTopItemRequest } from "./types/top-items/UsersTopItemRequest";
@@ -308,6 +310,26 @@ class SpotifySDK {
     } else {
       throw response.statusText;
     }
+  }
+
+  async setTrackProgress(value: TimeInMs, deviceId?: DeviceId) {
+    const url = new URL(`https://api.spotify.com/v1/me/player/seek`);
+
+    url.searchParams.set("position_ms", value.toString());
+    if (deviceId) {
+      url.searchParams.set("device_id", deviceId);
+    }
+
+    Log.d(`[MC] Setting track progress @ : ${url.href}`);
+    const token = await this.refreshAndGetToken();
+    const response = await axios.put(url.href, null, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    Log.d(`[MC] Setting track progress : ${response.status}`);
+    return response.status === 200;
   }
 }
 
