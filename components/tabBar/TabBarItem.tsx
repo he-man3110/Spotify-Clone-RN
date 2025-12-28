@@ -1,5 +1,7 @@
+import { useThemedStyleSheet } from "@hooks/useThemedStyleSheet.hook";
 import { Image, ImageSource } from "expo-image";
 import { StyleSheet, Text, View } from "react-native";
+import { Theme } from "../../theme/Theme.interface";
 
 export type TabBarItemProp = {
   isFocused: boolean;
@@ -8,7 +10,7 @@ export type TabBarItemProp = {
 };
 
 function TabBarItem({ isFocused, source, label }: TabBarItemProp) {
-  const styles = createTabBarStyles(isFocused);
+  const { styles } = useThemedStyleSheet(createTabBarStyles, isFocused);
 
   return (
     <View style={styles.iconContainer}>
@@ -18,7 +20,7 @@ function TabBarItem({ isFocused, source, label }: TabBarItemProp) {
   );
 }
 
-const createTabBarStyles = (isActive: boolean) => {
+const createTabBarStyles = (theme: Theme, isActive: boolean) => {
   return StyleSheet.create({
     iconContainer: {
       gap: 4,
@@ -28,10 +30,12 @@ const createTabBarStyles = (isActive: boolean) => {
     icon: {
       width: 24,
       height: 24,
-      tintColor: isActive ? "#fff" : "#b3b3b3",
+      tintColor: isActive
+        ? theme.colors.textPrimary
+        : theme.colors.textDisabled,
     },
     labelStyle: {
-      color: isActive ? "#fff" : "#b3b3b3",
+      color: isActive ? theme.colors.textPrimary : theme.colors.textDisabled,
       fontSize: 12,
     },
   });

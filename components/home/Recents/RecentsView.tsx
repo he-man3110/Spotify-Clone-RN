@@ -2,11 +2,13 @@ import { SptImage } from "@data/sdk/types/SptImage";
 import { loadTopHomeItems } from "@data/state/library/LibraryActions";
 import { selectUsersHomeItems } from "@data/state/library/LibrarySelectors";
 import { useAppDispatch, useAppSelector } from "@hooks/useStore";
+import { useThemedStyleSheet } from "@hooks/useThemedStyleSheet.hook";
 import { isLoading, isNotAvailable } from "@utils/CommonUtils";
 import { Image } from "expo-image";
 import React, { useEffect } from "react";
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
 import Animated from "react-native-reanimated";
+import { Theme } from "../../../theme/Theme.interface";
 
 export type RecentsViewProps = {
   style?: StyleProp<ViewStyle>;
@@ -46,7 +48,7 @@ const createRecentsViewStyles = () => {
 };
 
 const RecentItem = ({ title, image }: { title: string; image: SptImage }) => {
-  const styles = createRecentItemStyles();
+  const { styles } = useThemedStyleSheet(createRecentItemStyles);
 
   return (
     <Animated.View style={styles.container}>
@@ -59,27 +61,27 @@ const RecentItem = ({ title, image }: { title: string; image: SptImage }) => {
   );
 };
 
-const createRecentItemStyles = () => {
+const createRecentItemStyles = (theme: Theme) => {
   return StyleSheet.create({
     container: {
+      ...theme.shapes.xs,
+      backgroundColor: theme.colors.surface,
       flexDirection: "row",
-      borderRadius: 4,
-      backgroundColor: "#343333",
       minWidth: "46%",
       overflow: "hidden",
       alignItems: "center",
       columnGap: 6,
     },
     image: {
+      ...theme.shapes.xs,
       width: 60,
       height: 60,
-      borderRadius: 4,
     },
     title: {
       flex: 1,
       fontWeight: "700",
       fontSize: 12,
-      color: "#FCFCFC",
+      color: theme.colors.textSecondary,
     },
   });
 };

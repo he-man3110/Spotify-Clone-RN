@@ -1,10 +1,6 @@
+import { AuthProvider } from "@context/InitProvider";
+import AppThemeProvider from "@context/ThemeProvider";
 import { store } from "@data/state/store";
-import { useColorScheme } from "@hooks/useColorScheme";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -15,7 +11,6 @@ import {
   ReanimatedLogLevel,
 } from "react-native-reanimated";
 import { Provider } from "react-redux";
-import { AuthProvider } from "@context/InitProvider";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -27,10 +22,8 @@ configureReanimatedLogger({
 });
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <AppThemeProvider>
       <GestureHandlerRootView>
         <Provider store={store}>
           <AuthProvider>
@@ -41,6 +34,6 @@ export default function RootLayout() {
         </Provider>
         <StatusBar style="auto" />
       </GestureHandlerRootView>
-    </ThemeProvider>
+    </AppThemeProvider>
   );
 }
