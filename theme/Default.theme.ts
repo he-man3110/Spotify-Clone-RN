@@ -106,6 +106,8 @@ const theme: Theme = {
     textSecondary: "#FCFCFC",
     textDisabled: "#B3B3B3",
 
+    iconPrimary: "#FFFFFF",
+
     border: "",
     borderLight: "",
 

@@ -52,6 +52,8 @@ export interface Colors {
   textSecondary: string;
   textDisabled: string;
 
+  iconPrimary: string;
+
   border: string;
   borderLight: string;
 

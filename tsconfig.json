@@ -12,7 +12,8 @@
       "@data/*": ["./data/*"],
       "@hooks/*": ["./hooks/*"],
       "@utils/*": ["./utils/*"],
-      "@theme/*": ["./theme/*"]
+      "@theme/*": ["./theme/*"],
+      "@screens/*": ["./screens/*"]
     },
     "types": ["react", "react-native"],
     "experimentalDecorators": true,
