@@ -4,9 +4,10 @@ import { ColorUtils } from "@utils/ColorUtils";
 import Log from "@utils/log/Log";
 import { getColors, ImageColorsResult } from "react-native-image-colors";
 import { createAppAsyncThunk } from "../withTypes";
+import { preemptivelyUpdateProgress } from "./PlayerSlice";
 
 export const getCurrentlyPlaying = createAppAsyncThunk(
-  "LibrarySlice/getCurrentlyPlaying",
+  "PlayerSlice/getCurrentlyPlaying",
   async (_, thunkAPI) => {
     try {
       const result = await SpotifySDK.getCurrentlyPlayingTrack();
@@ -25,12 +26,35 @@ export const getCurrentlyPlaying = createAppAsyncThunk(
   }
 );
 
+export const setSeekerPosition = createAppAsyncThunk(
+  "PlayerSlice/setSeekerPosition",
+  async (newValueInMs: number, thunkAPI) => {
+    try {
+      const state = thunkAPI.getState();
+      const currentTotalMs =
+        state.player.currentlyPlaying.progress.totalMs ?? -1;
+
+      // Guard Limit.
+      if (currentTotalMs < newValueInMs || newValueInMs < 0) return false;
+
+      // Preemptively set new value.
+      thunkAPI.dispatch(preemptivelyUpdateProgress({ value: newValueInMs }));
+
+      // Dispatch backend sync.
+      const didSucceed = await SpotifySDK.setTrackProgress(newValueInMs);
+      return didSucceed;
+    } catch (error) {
+      return false;
+    }
+  }
+);
+
 export const extractAestheticColor = createAppAsyncThunk(
   "PlayerSlice/extractAestheticColor",
   async ({ uri, trackId }: { uri: string; trackId: SpotifyID }, thunkAPI) => {
     try {
       const state = thunkAPI.getState();
-      if (state.player.playing.aestheticColors.ids.includes(trackId)) {
+      if (state.player.currentlyPlaying.aestheticColors.ids.includes(trackId)) {
         thunkAPI.abort("value already present in state.");
         return;
       }

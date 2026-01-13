@@ -42,6 +42,15 @@ const config: ExpoConfig = {
         imageWidth: 120,
       },
     ],
+    [
+      "expo-font",
+      {
+        fonts: [
+          "./assets/fonts/SpaceMono-Regular.ttf",
+          "./assets/fonts/SpotifyMixUITitleVar.ttf",
+        ],
+      },
+    ],
     "expo-video",
   ],
 

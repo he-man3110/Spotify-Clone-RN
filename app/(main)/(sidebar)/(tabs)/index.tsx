@@ -10,6 +10,7 @@ export default function Home() {
   const timeoutTask = useRef<number>(null);
 
   useEffect(() => {
+    dispatch(getCurrentlyPlaying());
     timeoutTask.current = setInterval(() => {
       dispatch(getCurrentlyPlaying());
     }, 15_000);

@@ -57,12 +57,14 @@ function AutoScrollingText({
     const line = event.nativeEvent.lines.at(0);
     if (line) {
       textContentSize.value = line.width;
-      startAnimation();
     }
   };
 
   const startAnimation = () => {
-    if (textContentSize.value > availableWidth.value) {
+    if (
+      textContentSize.value > 0 &&
+      textContentSize.value > availableWidth.value
+    ) {
       const scrollValue =
         availableWidth.value - (textContentSize.value + 2 * FADE_AREA_WIDTH);
       const duration = (scrollValue / 30) * 1000;
@@ -83,6 +85,7 @@ function AutoScrollingText({
 
   useEffect(() => {
     // Reset to the beginning.
+    cancelAnimation(translateX);
     translateX.value = withTiming(0, { duration: 300 });
 
     // Start the animation after 500ms, to let the reset action complete.
